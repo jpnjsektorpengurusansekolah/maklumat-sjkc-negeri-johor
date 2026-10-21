@@ -22,6 +22,12 @@
       padding: 30px 20px;
       box-shadow: 0 4px 20px rgba(13, 110, 253, 0.2);
     }
+    .header-logo {
+      max-height: 85px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0px 2px 6px rgba(0,0,0,0.2));
+    }
     .search-card {
       border-radius: 16px;
       border: none;
@@ -78,9 +84,13 @@
 
   <div class="container py-5" style="max-width: 850px;">
     
-    <!-- 1. 顶部 Header -->
+    <!-- 1. 顶部 Header (包含 Logo) -->
     <div class="header-box text-center mb-4">
-      <h2 class="fw-bold mb-2"><i class="fa-solid fa-school me-2"></i>Sistem Carian Maklumat SJKC Johor</h2>
+      <div class="mb-3">
+        <!-- Logo 图片，若加载失败会自动隐藏 -->
+        <img src="./logo.png" alt="Logo JPNJ" class="header-logo" onerror="this.style.display='none'">
+      </div>
+      <h2 class="fw-bold mb-2">Sistem Carian Maklumat SJKC Johor</h2>
       <p class="mb-0 opacity-75">JPNJ Sektor Pengurusan Sekolah</p>
     </div>
 
@@ -152,12 +162,11 @@
     let schoolDatabase = [];
     let headers = [];
 
-    // 页面加载时，自动从 GitHub 提取数据库 Excel 文件
+    // 页面加载时自动读取数据库
     window.onload = function() {
       fetchDatabase();
     };
 
-    // 读取数据库文件 (默认读取根目录的 database.xlsx)
     async function fetchDatabase() {
       const spinner = document.getElementById('loading-spinner');
       spinner.classList.remove('d-none');
@@ -191,7 +200,6 @@
       }
     };
 
-    // 执行搜索
     function searchSchool() {
       const inputCode = document.getElementById('search-code').value.trim().toUpperCase();
       const resultCard = document.getElementById('result-card');
