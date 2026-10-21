@@ -61,7 +61,7 @@
       margin-bottom: 0;
     }
 
-    /* 搜索框设计 */
+    /* 搜索框与按钮强行对齐布局 */
     .search-card {
       border-radius: 16px;
       border: 1px solid rgba(0,0,0,0.05);
@@ -69,12 +69,19 @@
       background: #ffffff;
     }
 
+    .search-group {
+      display: flex !important;
+      width: 100% !important;
+    }
+
     .search-input {
       font-size: 1rem;
-      border-radius: 10px 0 0 10px;
+      border-radius: 10px 0 0 10px !important;
       padding: 12px 18px;
       border: 2px solid #e2e8f0;
       background-color: #f8fafc;
+      flex: 1 1 auto !important;
+      width: 1% !important;
     }
 
     .search-input:focus {
@@ -84,16 +91,20 @@
     }
 
     .search-btn {
-      border-radius: 0 10px 10px 0;
-      padding: 12px 24px;
+      border-radius: 0 10px 10px 0 !important;
+      padding: 12px 28px !important;
       font-weight: 600;
       background-color: #0a3d91;
       border-color: #0a3d91;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+      color: white;
     }
 
     .search-btn:hover {
       background-color: #062663;
       border-color: #062663;
+      color: white;
     }
 
     /* 结果卡片设计 */
@@ -147,16 +158,14 @@
 
   <div class="container py-4" style="max-width: 820px;">
     
-    <!-- 1. Header 模块 (Sistem 标题置顶) -->
+    <!-- 1. Header 模块 -->
     <div class="header-box text-center mb-3">
       <div class="d-flex align-items-center justify-content-center gap-3">
         <!-- Logo -->
         <img src="./logo.png" alt="Logo JPNJ" class="header-logo" onerror="this.style.display='none'">
         
         <div class="text-start">
-          <!-- 系统名称置顶 -->
           <h1 class="sys-title">Sistem Carian Maklumat SJKC Johor</h1>
-          <!-- 部门与单位资讯在下方 -->
           <div class="org-subtitle">JABATAN PENDIDIKAN NEGERI JOHOR</div>
           <div class="org-unit">SEKTOR PENGURUSAN SEKOLAH | UNIT PRASEKOLAH DAN RENDAH</div>
         </div>
@@ -168,6 +177,149 @@
       <label class="form-label fw-bold text-dark mb-2 style="font-size: 0.9rem;">
         <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>Masukkan Kod Sekolah:
       </label>
-      <div class="input-group">
-        <input id="search-code" type="text" class="form-control search-input" placeholder="Contoh: JBC1001..." onkeyup="if(event.key === 'Enter') searchSchool()">
-        <button onclick="search
+      <div class="search-group">
+        <!-- 支持输入时实时搜索 (oninput) 和 回车搜索 -->
+        <input id="search-code" type="text" class="form-control search-input" placeholder="Contoh: JBC1001..." oninput="searchSchool()" onkeyup="if(event.key === 'Enter') searchSchool()">
+        <button onclick="searchSchool()" class="btn btn-primary search-btn" type="button">
+          <i class="fa-solid fa-search me-1"></i> Cari
+        </button>
+      </div>
+      <div id="loading-spinner" class="mt-2 text-muted d-none" style="font-size: 0.85rem;">
+        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+        Sedang memuatkan pangkalan data...
+      </div>
+    </div>
+
+    <!-- 3. 未找到数据提示 -->
+    <div id="not-found-msg" class="alert alert-warning text-center rounded-4 shadow-sm d-none py-3 mb-3">
+      <i class="fa-solid fa-circle-exclamation me-2 fs-5 align-middle"></i>
+      <span id="not-found-text" class="fw-semibold">Kod Sekolah tidak dijumpai. Sila pastikan Kod Sekolah adalah betul.</span>
+    </div>
+
+    <!-- 4. 查询结果显示卡片 -->
+    <div id="result-card" class="result-card d-none">
+      <div class="result-header d-flex justify-content-between align-items-center">
+        <div>
+          <span class="badge bg-primary status-badge mb-1" id="display-col-a">KOD SEKOLAH</span>
+          <h3 class="fw-bold text-dark mb-0" id="display-col-b" style="font-size: 1.3rem;">-</h3>
+        </div>
+        <span class="badge bg-success status-badge"><i class="fa-solid fa-check-circle me-1"></i>Rekod Dijumpai</span>
+      </div>
+
+      <div class="card-body p-3">
+        <div class="row g-3">
+          <!-- Column C -->
+          <div class="col-md-6">
+            <div class="info-box">
+              <div class="info-label" id="label-col-c">Maklumat Column C</div>
+              <div class="info-value" id="val-col-c">-</div>
+            </div>
+          </div>
+
+          <!-- Column D -->
+          <div class="col-md-6">
+            <div class="info-box">
+              <div class="info-label" id="label-col-d">Maklumat Column D</div>
+              <div class="info-value" id="val-col-d">-</div>
+            </div>
+          </div>
+
+          <!-- Column E -->
+          <div class="col-md-6">
+            <div class="info-box">
+              <div class="info-label" id="label-col-e">Maklumat Column E</div>
+              <div class="info-value" id="val-col-e">-</div>
+            </div>
+          </div>
+
+          <!-- Column F -->
+          <div class="col-md-6">
+            <div class="info-box">
+              <div class="info-label" id="label-col-f">Maklumat Column F</div>
+              <div class="info-value" id="val-col-f">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let schoolDatabase = [];
+    let headers = [];
+
+    window.onload = function() {
+      fetchDatabase();
+    };
+
+    async function fetchDatabase() {
+      const spinner = document.getElementById('loading-spinner');
+      if (spinner) spinner.classList.remove('d-none');
+
+      try {
+        const response = await fetch('./database.xlsx?v=' + new Date().getTime());
+        if (!response.ok) {
+          throw new Error("Pangkalan data 'database.xlsx' tidak dijumpai.");
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+        
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        if (rows && rows.length > 0) {
+          headers = rows[0] || [];
+          schoolDatabase = rows.slice(1);
+
+          document.getElementById('label-col-c').innerText = headers[2] || 'Column C';
+          document.getElementById('label-col-d').innerText = headers[3] || 'Column D';
+          document.getElementById('label-col-e').innerText = headers[4] || 'Column E';
+          document.getElementById('label-col-f').innerText = headers[5] || 'Column F';
+        }
+      } catch (err) {
+        console.error("Status Database:", err.message);
+      } finally {
+        if (spinner) spinner.classList.add('d-none');
+      }
+    };
+
+    function searchSchool() {
+      const inputCode = document.getElementById('search-code').value.trim().toUpperCase();
+      const resultCard = document.getElementById('result-card');
+      const notFoundMsg = document.getElementById('not-found-msg');
+
+      if (!inputCode) {
+        resultCard.classList.add('d-none');
+        notFoundMsg.classList.add('d-none');
+        return;
+      }
+
+      const matchedRow = schoolDatabase.find(row => {
+        if (!row || row[0] === undefined || row[0] === null) return false;
+        const cellCode = String(row[0]).trim().toUpperCase();
+        return cellCode === inputCode;
+      });
+
+      if (matchedRow) {
+        notFoundMsg.classList.add('d-none');
+
+        document.getElementById('display-col-a').innerText = matchedRow[0] !== undefined ? matchedRow[0] : '-';
+        document.getElementById('display-col-b').innerText = matchedRow[1] !== undefined ? matchedRow[1] : '-';
+        document.getElementById('val-col-c').innerText = matchedRow[2] !== undefined ? matchedRow[2] : '-';
+        document.getElementById('val-col-d').innerText = matchedRow[3] !== undefined ? matchedRow[3] : '-';
+        document.getElementById('val-col-e').innerText = matchedRow[4] !== undefined ? matchedRow[4] : '-';
+        document.getElementById('val-col-f').innerText = matchedRow[5] !== undefined ? matchedRow[5] : '-';
+
+        resultCard.classList.remove('d-none');
+      } else {
+        resultCard.classList.add('d-none');
+        document.getElementById('not-found-text').innerText = `Kod Sekolah "${inputCode}" tidak dijumpai dalam pangkalan data.`;
+        notFoundMsg.classList.remove('d-none');
+      }
+    }
+  </script>
+</body>
+</html>
