@@ -87,7 +87,7 @@
     <!-- 2. 搜索框区域 -->
     <div class="card search-card p-4 mb-4">
       <label class="form-label fw-bold text-dark mb-2">
-        <i class="fa-solid fa-magnifying-glass text-primary me-1"></i> Masukkan Kod Sekolah (Column A):
+        <i class="fa-solid fa-magnifying-glass text-primary me-1"></i> Masukkan Kod Sekolah:
       </label>
       <div class="input-group">
         <input id="search-code" type="text" class="form-control search-input" placeholder="Contoh: JBC1001..." onkeyup="if(event.key === 'Enter') searchSchool()">
@@ -107,7 +107,7 @@
       <span id="not-found-text">Kod Sekolah tidak dijumpai. Sila pastikan Kod Sekolah adalah betul.</span>
     </div>
 
-    <!-- 4. 查询结果展示卡片 (整洁模块设计) -->
+    <!-- 4. 查询结果展示卡片 -->
     <div id="result-card" class="result-card d-none">
       <div class="result-header d-flex justify-content-between align-items-center">
         <div>
@@ -163,7 +163,6 @@
       spinner.classList.remove('d-none');
 
       try {
-        // 请求同目录下的 database.xlsx
         const response = await fetch('./database.xlsx?v=' + new Date().getTime());
         if (!response.ok) {
           throw new Error("Pangkalan data 'database.xlsx' tidak dijumpai.");
@@ -174,16 +173,12 @@
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         
-        // 读取全部数据为二维数组
         const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
         if (rows.length > 0) {
-          // 第一行为表头（Header）
           headers = rows[0];
-          // 其余行为数据库记录
           schoolDatabase = rows.slice(1);
 
-          // 动态设置 Column C, D, E, F 的标题
           document.getElementById('label-col-c').innerText = headers[2] || 'Column C';
           document.getElementById('label-col-d').innerText = headers[3] || 'Column D';
           document.getElementById('label-col-e').innerText = headers[4] || 'Column E';
@@ -207,27 +202,22 @@
         return;
       }
 
-      // 在 Column A (row[0]) 中比对 Kod Sekolah
       const matchedRow = schoolDatabase.find(row => {
         return row[0] && row[0].toString().trim().toUpperCase() === inputCode;
       });
 
       if (matchedRow) {
-        // 隐蔽“未找到”提示
         notFoundMsg.classList.add('d-none');
 
-        // 填入结果
-        document.getElementById('display-col-a').innerText = matchedRow[0] || '-'; // Column A: Kod Sekolah
-        document.getElementById('display-col-b').innerText = matchedRow[1] || '-'; // Column B: Nama Sekolah
-        document.getElementById('val-col-c').innerText = matchedRow[2] || '-';     // Column C
-        document.getElementById('val-col-d').innerText = matchedRow[3] || '-';     // Column D
-        document.getElementById('val-col-e').innerText = matchedRow[4] || '-';     // Column E
-        document.getElementById('val-col-f').innerText = matchedRow[5] || '-';     // Column F
+        document.getElementById('display-col-a').innerText = matchedRow[0] || '-';
+        document.getElementById('display-col-b').innerText = matchedRow[1] || '-';
+        document.getElementById('val-col-c').innerText = matchedRow[2] || '-';
+        document.getElementById('val-col-d').innerText = matchedRow[3] || '-';
+        document.getElementById('val-col-e').innerText = matchedRow[4] || '-';
+        document.getElementById('val-col-f').innerText = matchedRow[5] || '-';
 
-        // 显示卡片
         resultCard.classList.remove('d-none');
       } else {
-        // 隐藏卡片并提示
         resultCard.classList.add('d-none');
         document.getElementById('not-found-text').innerText = `Kod Sekolah "${inputCode}" tidak dijumpai dalam pangkalan data.`;
         notFoundMsg.classList.remove('d-none');
