@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Maklumat SJKC Negeri Johor</title>
+  <title>JPNJ Sektor Pengurusan Sekolah</title>
   <!-- Bootstrap CSS 样式库 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- SheetJS Excel 处理库 -->
@@ -32,7 +32,7 @@
 
   <div class="container py-5" style="max-width: 800px;">
     <!-- 标题 -->
-    <h2 class="text-center fw-bold text-dark mb-4">🏫 Maklumat SJKC Negeri Johor</h2>
+    <h2 class="text-center fw-bold text-dark mb-4">🏫 JPNJ Sektor Pengurusan Sekolah</h2>
 
     <!-- 1. 登录模块 -->
     <div id="auth-section" class="card p-4 mb-4">
@@ -128,18 +128,7 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // 检查重定向登录结果
-    auth.getRedirectResult().then(result => {
-      if (result && result.user) {
-        console.log("Google 登录成功:", result.user);
-      }
-    }).catch(err => {
-      if (err.code && err.code !== 'auth/popup-closed-by-user') {
-        alert("Google 登录失败: " + err.message);
-      }
-    });
-
-    // 监听用户登录状态
+    // 监听用户登录状态改变
     auth.onAuthStateChanged(user => {
       const authSec = document.getElementById('auth-section');
       const appSec = document.getElementById('app-section');
@@ -166,10 +155,14 @@
       auth.createUserWithEmailAndPassword(email, pass).then(() => alert("注册成功，已自动登录！")).catch(err => alert("注册失败: " + err.message));
     }
 
-    // Google 一键登录逻辑
+    // Google 一键登录逻辑 (改用独立的 Popup 弹窗形式)
     function loginWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithRedirect(provider);
+      auth.signInWithPopup(provider).catch(err => {
+        if (err.code !== 'auth/popup-closed-by-user') {
+          alert("Google 登录失败: " + err.message);
+        }
+      });
     }
 
     function logout() {
@@ -267,7 +260,7 @@
     // ==========================================
     function downloadExcel() {
       if (processedWorkbook) {
-        XLSX.writeFile(processedWorkbook, "Maklumat_SJKC_Results.xlsx");
+        XLSX.writeFile(processedWorkbook, "JPNJ_SPS_Search_Results.xlsx");
       }
     }
   </script>
