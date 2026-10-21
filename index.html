@@ -24,16 +24,24 @@
       background: linear-gradient(135deg, #0a3d91 0%, #062663 100%);
       color: white;
       border-radius: 16px;
-      padding: 18px 20px; /* 缩小上下边距 */
+      padding: 18px 20px;
       box-shadow: 0 8px 20px rgba(10, 61, 145, 0.2);
       border-bottom: 3px solid #f1c40f;
     }
 
     .header-logo {
-      max-height: 60px; /* 适当缩小 Logo 尺寸 */
+      max-height: 60px;
       width: auto;
       object-fit: contain;
       filter: drop-shadow(0px 2px 6px rgba(0,0,0,0.3));
+    }
+
+    .sys-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      margin-bottom: 4px;
+      color: #ffffff;
     }
 
     .org-subtitle {
@@ -50,13 +58,6 @@
       font-weight: 500;
       color: rgba(255, 255, 255, 0.8);
       text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .sys-title {
-      font-size: 1.35rem;
-      font-weight: 800;
-      letter-spacing: -0.3px;
       margin-bottom: 0;
     }
 
@@ -146,16 +147,18 @@
 
   <div class="container py-4" style="max-width: 820px;">
     
-    <!-- 1. 紧凑型 Header 模块 -->
+    <!-- 1. Header 模块 (Sistem 标题置顶) -->
     <div class="header-box text-center mb-3">
       <div class="d-flex align-items-center justify-content-center gap-3">
         <!-- Logo -->
         <img src="./logo.png" alt="Logo JPNJ" class="header-logo" onerror="this.style.display='none'">
         
         <div class="text-start">
+          <!-- 系统名称置顶 -->
+          <h1 class="sys-title">Sistem Carian Maklumat SJKC Johor</h1>
+          <!-- 部门与单位资讯在下方 -->
           <div class="org-subtitle">JABATAN PENDIDIKAN NEGERI JOHOR</div>
           <div class="org-unit">SEKTOR PENGURUSAN SEKOLAH | UNIT PRASEKOLAH DAN RENDAH</div>
-          <h1 class="sys-title">Sistem Carian Maklumat SJKC Johor</h1>
         </div>
       </div>
     </div>
@@ -167,150 +170,4 @@
       </label>
       <div class="input-group">
         <input id="search-code" type="text" class="form-control search-input" placeholder="Contoh: JBC1001..." onkeyup="if(event.key === 'Enter') searchSchool()">
-        <button onclick="searchSchool()" class="btn btn-primary search-btn">
-          <i class="fa-solid fa-search me-1"></i> Cari
-        </button>
-      </div>
-      <div id="loading-spinner" class="mt-2 text-muted d-none" style="font-size: 0.85rem;">
-        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-        Sedang memuatkan pangkalan data...
-      </div>
-    </div>
-
-    <!-- 3. 未找到数据提示 -->
-    <div id="not-found-msg" class="alert alert-warning text-center rounded-4 shadow-sm d-none py-3 mb-3">
-      <i class="fa-solid fa-circle-exclamation me-2 fs-5 align-middle"></i>
-      <span id="not-found-text" class="fw-semibold">Kod Sekolah tidak dijumpai. Sila pastikan Kod Sekolah adalah betul.</span>
-    </div>
-
-    <!-- 4. 查询结果显示卡片 -->
-    <div id="result-card" class="result-card d-none">
-      <div class="result-header d-flex justify-content-between align-items-center">
-        <div>
-          <span class="badge bg-primary status-badge mb-1" id="display-col-a">KOD SEKOLAH</span>
-          <h3 class="fw-bold text-dark mb-0" id="display-col-b" style="font-size: 1.3rem;">-</h3>
-        </div>
-        <span class="badge bg-success status-badge"><i class="fa-solid fa-check-circle me-1"></i>Rekod Dijumpai</span>
-      </div>
-
-      <div class="card-body p-3">
-        <div class="row g-3">
-          <!-- Column C -->
-          <div class="col-md-6">
-            <div class="info-box">
-              <div class="info-label" id="label-col-c">Maklumat Column C</div>
-              <div class="info-value" id="val-col-c">-</div>
-            </div>
-          </div>
-
-          <!-- Column D -->
-          <div class="col-md-6">
-            <div class="info-box">
-              <div class="info-label" id="label-col-d">Maklumat Column D</div>
-              <div class="info-value" id="val-col-d">-</div>
-            </div>
-          </div>
-
-          <!-- Column E -->
-          <div class="col-md-6">
-            <div class="info-box">
-              <div class="info-label" id="label-col-e">Maklumat Column E</div>
-              <div class="info-value" id="val-col-e">-</div>
-            </div>
-          </div>
-
-          <!-- Column F -->
-          <div class="col-md-6">
-            <div class="info-box">
-              <div class="info-label" id="label-col-f">Maklumat Column F</div>
-              <div class="info-value" id="val-col-f">-</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <script>
-    let schoolDatabase = [];
-    let headers = [];
-
-    // 页面载入时自动拉取 database.xlsx
-    window.onload = function() {
-      fetchDatabase();
-    };
-
-    async function fetchDatabase() {
-      const spinner = document.getElementById('loading-spinner');
-      if (spinner) spinner.classList.remove('d-none');
-
-      try {
-        // 加时间戳防止浏览器强缓存
-        const response = await fetch('./database.xlsx?v=' + new Date().getTime());
-        if (!response.ok) {
-          throw new Error("Pangkalan data 'database.xlsx' tidak dijumpai.");
-        }
-        const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
-        
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
-        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-        if (rows && rows.length > 0) {
-          headers = rows[0] || [];
-          schoolDatabase = rows.slice(1);
-
-          // 填充卡片标题
-          document.getElementById('label-col-c').innerText = headers[2] || 'Column C';
-          document.getElementById('label-col-d').innerText = headers[3] || 'Column D';
-          document.getElementById('label-col-e').innerText = headers[4] || 'Column E';
-          document.getElementById('label-col-f').innerText = headers[5] || 'Column F';
-        }
-      } catch (err) {
-        console.error("Status Database:", err.message);
-      } finally {
-        if (spinner) spinner.classList.add('d-none');
-      }
-    };
-
-    // 执行搜索与容错匹配
-    function searchSchool() {
-      const inputCode = document.getElementById('search-code').value.trim().toUpperCase();
-      const resultCard = document.getElementById('result-card');
-      const notFoundMsg = document.getElementById('not-found-msg');
-
-      if (!inputCode) {
-        alert("Sila masukkan Kod Sekolah!");
-        return;
-      }
-
-      // 强力匹配逻辑：去空格、转大写
-      const matchedRow = schoolDatabase.find(row => {
-        if (!row || row[0] === undefined || row[0] === null) return false;
-        const cellCode = String(row[0]).trim().toUpperCase();
-        return cellCode === inputCode;
-      });
-
-      if (matchedRow) {
-        notFoundMsg.classList.add('d-none');
-
-        document.getElementById('display-col-a').innerText = matchedRow[0] !== undefined ? matchedRow[0] : '-';
-        document.getElementById('display-col-b').innerText = matchedRow[1] !== undefined ? matchedRow[1] : '-';
-        document.getElementById('val-col-c').innerText = matchedRow[2] !== undefined ? matchedRow[2] : '-';
-        document.getElementById('val-col-d').innerText = matchedRow[3] !== undefined ? matchedRow[3] : '-';
-        document.getElementById('val-col-e').innerText = matchedRow[4] !== undefined ? matchedRow[4] : '-';
-        document.getElementById('val-col-f').innerText = matchedRow[5] !== undefined ? matchedRow[5] : '-';
-
-        resultCard.classList.remove('d-none');
-      } else {
-        resultCard.classList.add('d-none');
-        document.getElementById('not-found-text').innerText = `Kod Sekolah "${inputCode}" tidak dijumpai dalam pangkalan data.`;
-        notFoundMsg.classList.remove('d-none');
-      }
-    }
-  </script>
-</body>
-</html>
+        <button onclick="search
