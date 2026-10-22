@@ -62,9 +62,11 @@
       background: #ffffff;
     }
 
-    .custom-search-container {
-      display: flex;
-      width: 100%;
+    .search-row {
+      display: flex !important;
+      flex-direction: row !important;
+      width: 100% !important;
+      align-items: center !important;
     }
 
     .search-input {
@@ -73,7 +75,8 @@
       padding: 12px 18px;
       border: 2px solid #e2e8f0;
       background-color: #f8fafc;
-      flex: 1;
+      flex: 1 1 auto !important;
+      width: 100% !important;
       outline: none;
     }
 
@@ -88,15 +91,15 @@
       font-weight: 600;
       background-color: #0a3d91;
       border: 2px solid #0a3d91;
-      color: white;
-      white-space: nowrap;
+      color: white !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
       cursor: pointer;
     }
 
     .search-btn:hover {
       background-color: #062663;
       border-color: #062663;
-      color: white;
     }
 
     .result-card {
@@ -147,12 +150,10 @@
       font-weight: 600;
       text-decoration: none;
       font-size: 0.9rem;
-      transition: background-color 0.2s ease;
     }
 
     .download-btn:hover {
       background-color: #0b5ed7;
-      color: white !important;
     }
 
     .status-badge {
@@ -179,18 +180,24 @@
       </div>
     </div>
 
+    <!-- 全局状态报错 Banner -->
+    <div id="db-error-banner" class="alert alert-danger text-center rounded-4 shadow-sm d-none mb-3 py-2">
+      <i class="fa-solid fa-triangle-exclamation me-2"></i>
+      <span id="db-error-text">Ralat memuatkan database.xlsx</span>
+    </div>
+
     <!-- 2. 搜索框区域 -->
     <div class="card search-card p-3 mb-3">
       <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.9rem;">
         <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>Masukkan Kod Sekolah:
       </label>
-      <div class="custom-search-container">
+      <div class="search-row">
         <input id="search-code" type="text" class="search-input" placeholder="Contoh: JBC1001..." oninput="searchSchool()" onkeyup="if(event.key === 'Enter') searchSchool()">
         <button onclick="searchSchool()" class="search-btn" type="button">
           <i class="fa-solid fa-search me-1"></i> Cari
         </button>
       </div>
-      <div id="loading-spinner" class="mt-2 text-muted d-none" style="font-size: 0.85rem;">
+      <div id="loading-spinner" class="mt-2 text-muted" style="font-size: 0.85rem;">
         <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
         Sedang memuatkan pangkalan data...
       </div>
@@ -229,12 +236,13 @@
 
     async function fetchDatabase() {
       const spinner = document.getElementById('loading-spinner');
-      if (spinner) spinner.classList.remove('d-none');
+      const errBanner = document.getElementById('db-error-banner');
+      const errText = document.getElementById('db-error-text');
 
       try {
         const response = await fetch('./database.xlsx?v=' + new Date().getTime());
         if (!response.ok) {
-          throw new Error("Pangkalan data 'database.xlsx' tidak dijumpai.");
+          throw new Error("Gagal mengambil fail 'database.xlsx'. Sila pastikan nama fail di GitHub adalah 'database.xlsx'.");
         }
         const arrayBuffer = await response.arrayBuffer();
         const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
@@ -247,9 +255,16 @@
         if (rows && rows.length > 0) {
           headers = rows[0] || [];
           schoolDatabase = rows.slice(1);
+          if (errBanner) errBanner.classList.add('d-none');
+        } else {
+          throw new Error("Fail 'database.xlsx' kosong!");
         }
       } catch (err) {
         console.error("Status Database:", err.message);
+        if (errBanner && errText) {
+          errText.innerText = err.message;
+          errBanner.classList.remove('d-none');
+        }
       } finally {
         if (spinner) spinner.classList.add('d-none');
       }
@@ -275,10 +290,45 @@
       if (matchedRow) {
         notFoundMsg.classList.add('d-none');
 
-        // Column A (Index 0) 和 Column B (Index 1)
-        document.getElementById('display-col-a').innerText = (matchedRow[0] !== undefined && matchedRow[0] !== '') ? matchedRow[0] : '-';
-        document.getElementById('display-col-b').innerText = (matchedRow[1] !== undefined && matchedRow[1] !== '') ? matchedRow[1] : '-';
+        const colAVal = (matchedRow[0] !== undefined && matchedRow[0] !== null && String(matchedRow[0]).trim() !== '') ? matchedRow[0] : '-';
+        const colBVal = (matchedRow[1] !== undefined && matchedRow[1] !== null && String(matchedRow[1]).trim() !== '') ? matchedRow[1] : '-';
+
+        document.getElementById('display-col-a').innerText = colAVal;
+        document.getElementById('display-col-b').innerText = colBVal;
 
         let cardsHTML = '';
-        // 循环 Column C 到 Column L (Index 2 到 11)
-        for (
+        for (let i = 2; i <= 11; i++) {
+          const labelName = (headers[i] && String(headers[i]).trim() !== '') ? headers[i] : `Column ${String.fromCharCode(65 + i)}`;
+          const rawVal = (matchedRow[i] !== undefined && matchedRow[i] !== null) ? String(matchedRow[i]).trim() : '';
+
+          let displayContent = '-';
+
+          if (rawVal !== '') {
+            if (rawVal.toLowerCase().startsWith('http://') || rawVal.toLowerCase().startsWith('https://')) {
+              displayContent = `<a href="${rawVal}" target="_blank" class="download-btn"><i class="fa-solid fa-download"></i> Download</a>`;
+            } else {
+              displayContent = rawVal;
+            }
+          }
+
+          cardsHTML += `
+            <div class="col-md-6">
+              <div class="info-box">
+                <div class="info-label">${labelName}</div>
+                <div class="info-value">${displayContent}</div>
+              </div>
+            </div>
+          `;
+        }
+
+        container.innerHTML = cardsHTML;
+        resultCard.classList.remove('d-none');
+      } else {
+        resultCard.classList.add('d-none');
+        document.getElementById('not-found-text').innerText = `Kod Sekolah "${inputCode}" tidak dijumpai dalam pangkalan data.`;
+        notFoundMsg.classList.remove('d-none');
+      }
+    }
+  </script>
+</body>
+</html>
