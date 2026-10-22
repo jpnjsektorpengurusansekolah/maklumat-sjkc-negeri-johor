@@ -17,30 +17,40 @@
       color: #2c3e50;
     }
 
+    /* 吸顶固定 Header 悬浮效果 */
+    .sticky-header-wrapper {
+      position: sticky;
+      top: 0;
+      z-index: 1020;
+      background-color: #f0f3f8;
+      padding-top: 15px;
+      padding-bottom: 10px;
+    }
+
     .header-box {
       background: linear-gradient(135deg, #0a3d91 0%, #062663 100%);
       color: white;
       border-radius: 16px;
-      padding: 18px 20px;
-      box-shadow: 0 8px 20px rgba(10, 61, 145, 0.2);
+      padding: 16px 20px;
+      box-shadow: 0 8px 20px rgba(10, 61, 145, 0.25);
       border-bottom: 3px solid #f1c40f;
     }
 
     .header-logo {
-      max-height: 60px;
+      max-height: 55px;
       width: auto;
       object-fit: contain;
     }
 
     .sys-title {
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: 800;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       color: #ffffff;
     }
 
     .org-subtitle {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       color: #f1c40f;
       text-transform: uppercase;
@@ -48,7 +58,7 @@
     }
 
     .org-unit {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 500;
       color: rgba(255, 255, 255, 0.8);
       text-transform: uppercase;
@@ -67,12 +77,13 @@
       flex-direction: row !important;
       width: 100% !important;
       align-items: center !important;
+      position: relative;
     }
 
     .search-input {
       font-size: 1rem;
       border-radius: 10px 0 0 10px !important;
-      padding: 12px 18px;
+      padding: 12px 40px 12px 18px; /* 右侧留空间给清除图标 */
       border: 2px solid #e2e8f0;
       background-color: #f8fafc;
       flex: 1 1 auto !important;
@@ -83,6 +94,24 @@
     .search-input:focus {
       border-color: #0a3d91;
       background-color: #ffffff;
+    }
+
+    /* 一键清空图标按钮 */
+    .clear-btn {
+      position: absolute;
+      right: 110px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: #a0aec0;
+      cursor: pointer;
+      display: none;
+      font-size: 0.9rem;
+    }
+
+    .clear-btn:hover {
+      color: #e53e3e;
     }
 
     .search-btn {
@@ -162,20 +191,33 @@
       border-radius: 20px;
       font-weight: 600;
     }
+
+    /* 打印样式支持 */
+    @media print {
+      .sticky-header-wrapper, .search-card, .btn-print-action {
+        display: none !important;
+      }
+      .result-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <div class="container py-4" style="max-width: 860px;">
+  <div class="container pb-5" style="max-width: 860px;">
     
-    <!-- 1. Header 模块 -->
-    <div class="header-box text-center mb-3">
-      <div class="d-flex align-items-center justify-content-center gap-3">
-        <img src="./logo.png" alt="Logo JPNJ" class="header-logo" onerror="this.style.display='none'">
-        <div class="text-start">
-          <h1 class="sys-title">Sistem Carian Maklumat SJKC Johor</h1>
-          <div class="org-subtitle">JABATAN PENDIDIKAN NEGERI JOHOR</div>
-          <div class="org-unit">SEKTOR PENGURUSAN SEKOLAH | UNIT PRASEKOLAH DAN RENDAH</div>
+    <!-- 1. 悬浮固定 Header 模块 -->
+    <div class="sticky-header-wrapper">
+      <div class="header-box text-center">
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          <img src="./logo.png" alt="Logo JPNJ" class="header-logo" onerror="this.style.display='none'">
+          <div class="text-start">
+            <h1 class="sys-title">Sistem Carian Maklumat SJKC Johor</h1>
+            <div class="org-subtitle">JABATAN PENDIDIKAN NEGERI JOHOR</div>
+            <div class="org-unit">SEKTOR PENGURUSAN SEKOLAH | UNIT PRASEKOLAH DAN RENDAH</div>
+          </div>
         </div>
       </div>
     </div>
@@ -192,7 +234,8 @@
         <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>Masukkan Kod Sekolah:
       </label>
       <div class="search-row">
-        <input id="search-code" type="text" class="search-input" placeholder="Contoh: JBC1001..." oninput="searchSchool()" onkeyup="if(event.key === 'Enter') searchSchool()">
+        <input id="search-code" type="text" class="search-input" placeholder="Contoh: JBC1001..." oninput="handleInput()" onkeyup="if(event.key === 'Enter') searchSchool()">
+        <button id="clear-btn" class="clear-btn" onclick="clearSearch()" type="button" title="Kosongkan"><i class="fa-solid fa-circle-xmark"></i></button>
         <button onclick="searchSchool()" class="search-btn" type="button">
           <i class="fa-solid fa-search me-1"></i> Cari
         </button>
@@ -216,12 +259,22 @@
           <span class="badge bg-primary status-badge mb-1" id="display-col-a">KOD SEKOLAH</span>
           <h3 class="fw-bold text-dark mb-0" id="display-col-b" style="font-size: 1.3rem;">-</h3>
         </div>
-        <span class="badge bg-success status-badge"><i class="fa-solid fa-check-circle me-1"></i>Rekod Dijumpai</span>
+        <div class="d-flex align-items-center gap-2">
+          <button onclick="window.print()" class="btn btn-sm btn-outline-secondary btn-print-action rounded-3 fw-semibold">
+            <i class="fa-solid fa-print me-1"></i> Cetak
+          </button>
+          <span class="badge bg-success status-badge"><i class="fa-solid fa-check-circle me-1"></i>Rekod Dijumpai</span>
+        </div>
       </div>
 
       <div class="card-body p-3">
         <div class="row g-3" id="details-container"></div>
       </div>
+    </div>
+
+    <!-- 页脚版权 -->
+    <div class="text-center text-muted mt-4" style="font-size: 0.8rem;">
+      Hak Cipta Terpelihara © Jabatan Pendidikan Negeri Johor | Unit Prasekolah dan Rendah
     </div>
 
   </div>
@@ -269,6 +322,27 @@
         if (spinner) spinner.classList.add('d-none');
       }
     };
+
+    function handleInput() {
+      const inputEl = document.getElementById('search-code');
+      const clearBtn = document.getElementById('clear-btn');
+      
+      if (inputEl.value.trim() !== '') {
+        clearBtn.style.display = 'block';
+      } else {
+        clearBtn.style.display = 'none';
+      }
+      
+      searchSchool();
+    }
+
+    function clearSearch() {
+      const inputEl = document.getElementById('search-code');
+      inputEl.value = '';
+      document.getElementById('clear-btn').style.display = 'none';
+      searchSchool();
+      inputEl.focus();
+    }
 
     function searchSchool() {
       const inputCode = document.getElementById('search-code').value.trim().toUpperCase();
