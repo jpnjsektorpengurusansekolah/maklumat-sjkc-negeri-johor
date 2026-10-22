@@ -136,6 +136,25 @@
       word-break: break-word;
     }
 
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #0d6efd;
+      color: white !important;
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background-color 0.2s ease;
+    }
+
+    .download-btn:hover {
+      background-color: #0b5ed7;
+      color: white !important;
+    }
+
     .status-badge {
       font-size: 0.78rem;
       padding: 6px 12px;
@@ -183,7 +202,7 @@
       <span id="not-found-text" class="fw-semibold">Kod Sekolah tidak dijumpai. Sila pastikan Kod Sekolah adalah betul.</span>
     </div>
 
-    <!-- 4. 查询结果显示卡片 (展示 Column B 到 Column L) -->
+    <!-- 4. 查询结果显示卡片 -->
     <div id="result-card" class="result-card d-none">
       <div class="result-header d-flex justify-content-between align-items-center">
         <div>
@@ -194,96 +213,3 @@
       </div>
 
       <div class="card-body p-3">
-        <div class="row g-3" id="details-container"></div>
-      </div>
-    </div>
-
-  </div>
-
-  <script>
-    let schoolDatabase = [];
-    let headers = [];
-
-    window.onload = function() {
-      fetchDatabase();
-    };
-
-    async function fetchDatabase() {
-      const spinner = document.getElementById('loading-spinner');
-      if (spinner) spinner.classList.remove('d-none');
-
-      try {
-        const response = await fetch('./database.xlsx?v=' + new Date().getTime());
-        if (!response.ok) {
-          throw new Error("Pangkalan data 'database.xlsx' tidak dijumpai.");
-        }
-        const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
-        
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
-        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-        if (rows && rows.length > 0) {
-          headers = rows[0] || [];
-          schoolDatabase = rows.slice(1);
-        }
-      } catch (err) {
-        console.error("Status Database:", err.message);
-      } finally {
-        if (spinner) spinner.classList.add('d-none');
-      }
-    };
-
-    function searchSchool() {
-      const inputCode = document.getElementById('search-code').value.trim().toUpperCase();
-      const resultCard = document.getElementById('result-card');
-      const notFoundMsg = document.getElementById('not-found-msg');
-      const container = document.getElementById('details-container');
-
-      if (!inputCode) {
-        resultCard.classList.add('d-none');
-        notFoundMsg.classList.add('d-none');
-        return;
-      }
-
-      const matchedRow = schoolDatabase.find(row => {
-        if (!row || row[0] === undefined || row[0] === null) return false;
-        return String(row[0]).trim().toUpperCase() === inputCode;
-      });
-
-      if (matchedRow) {
-        notFoundMsg.classList.add('d-none');
-
-        document.getElementById('display-col-a').innerText = matchedRow[0] !== undefined ? matchedRow[0] : '-';
-        document.getElementById('display-col-b').innerText = matchedRow[1] !== undefined ? matchedRow[1] : '-';
-
-        let cardsHTML = '';
-        for (let i = 2; i <= 11; i++) {
-          const labelName = headers[i] || `Column ${String.fromCharCode(65 + i)}`;
-          const valText = (matchedRow[i] !== undefined && matchedRow[i] !== null && String(matchedRow[i]).trim() !== '') 
-                          ? matchedRow[i] 
-                          : '-';
-
-          cardsHTML += `
-            <div class="col-md-6">
-              <div class="info-box">
-                <div class="info-label">${labelName}</div>
-                <div class="info-value">${valText}</div>
-              </div>
-            </div>
-          `;
-        }
-
-        container.innerHTML = cardsHTML;
-        resultCard.classList.remove('d-none');
-      } else {
-        resultCard.classList.add('d-none');
-        document.getElementById('not-found-text').innerText = `Kod Sekolah "${inputCode}" tidak dijumpai dalam pangkalan data.`;
-        notFoundMsg.classList.remove('d-none');
-      }
-    }
-  </script>
-</body>
-</html>
