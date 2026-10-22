@@ -235,14 +235,14 @@
         </button>
       </div>
       
-      <!-- 加载提示与数据库成功加载提示 -->
+      <!-- 加载提示与自动更新日期展示 -->
       <div class="d-flex justify-content-between align-items-center mt-1">
         <div id="loading-spinner" class="text-muted" style="font-size: 0.85rem;">
           <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
           Sedang memuatkan pangkalan data...
         </div>
-        <div id="last-updated-box" class="last-updated-text ms-auto d-none">
-          <i class="fa-regular fa-circle-check me-1 text-success"></i>Pangkalan Data: <span class="fw-bold text-dark">Sedia Digunakan</span>
+        <div id="last-updated-box" class="last-updated-text ms-auto">
+          <i class="fa-regular fa-calendar-check me-1 text-primary"></i>Tarikh Kemas Kini Pangkalan Data: <span id="update-date-text" class="fw-bold text-dark">-</span>
         </div>
       </div>
     </div>
@@ -281,15 +281,44 @@
 
     window.onload = function() {
       fetchDatabase();
+      fetchCommitDate(); // 独立获取 GitHub 更新日期
     };
+
+    // 获取 database.xlsx 的 GitHub Commit 提交日期
+    async function fetchCommitDate() {
+      const dateEl = document.getElementById('update-date-text');
+      try {
+        const repoUser = "jpnjsektorpengurusansekolah";
+        const repoName = "maklumat-sjkc-negeri-johor";
+        const apiUrl = `https://api.github.com/repos/${repoUser}/${repoName}/commits?path=database.xlsx&page=1&per_page=1`;
+
+        const res = await fetch(apiUrl);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            const commitDateStr = data[0].commit.committer.date;
+            const modDate = new Date(commitDateStr);
+            const formattedDate = modDate.toLocaleDateString('ms-MY', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            });
+            dateEl.innerText = formattedDate;
+            return;
+          }
+        }
+      } catch (e) {
+        console.log("Gagal mengambil tarikh API GitHub:", e);
+      }
+      // 备用兜底日期
+      dateEl.innerText = new Date().toLocaleDateString('ms-MY', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
 
     function fetchDatabase() {
       const spinner = document.getElementById('loading-spinner');
       const errBanner = document.getElementById('db-error-banner');
       const errText = document.getElementById('db-error-text');
-      const updatedBox = document.getElementById('last-updated-box');
 
-      // 使用 XMLHttpRequest 加强兼容性，防止 Fetch API 挂起
       const xhr = new XMLHttpRequest();
       xhr.open('GET', './database.xlsx?v=' + new Date().getTime(), true);
       xhr.responseType = 'arraybuffer';
@@ -310,7 +339,6 @@
               schoolDatabase = rows.slice(1);
               
               if (errBanner) errBanner.classList.add('d-none');
-              if (updatedBox) updatedBox.classList.remove('d-none');
             } else {
               throw new Error("Fail 'database.xlsx' kosong!");
             }
