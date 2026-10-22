@@ -83,7 +83,7 @@
     .search-input {
       font-size: 1rem;
       border-radius: 10px 0 0 10px !important;
-      padding: 12px 40px 12px 18px; /* 右侧留空间给清除图标 */
+      padding: 12px 40px 12px 18px;
       border: 2px solid #e2e8f0;
       background-color: #f8fafc;
       flex: 1 1 auto !important;
@@ -96,7 +96,6 @@
       background-color: #ffffff;
     }
 
-    /* 一键清空图标按钮 */
     .clear-btn {
       position: absolute;
       right: 110px;
@@ -129,6 +128,12 @@
     .search-btn:hover {
       background-color: #062663;
       border-color: #062663;
+    }
+
+    .last-updated-text {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 500;
     }
 
     .result-card {
@@ -191,17 +196,6 @@
       border-radius: 20px;
       font-weight: 600;
     }
-
-    /* 打印样式支持 */
-    @media print {
-      .sticky-header-wrapper, .search-card, .btn-print-action {
-        display: none !important;
-      }
-      .result-card {
-        box-shadow: none !important;
-        border: 1px solid #ccc !important;
-      }
-    }
   </style>
 </head>
 <body>
@@ -233,16 +227,23 @@
       <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.9rem;">
         <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>Masukkan Kod Sekolah:
       </label>
-      <div class="search-row">
+      <div class="search-row mb-2">
         <input id="search-code" type="text" class="search-input" placeholder="Contoh: JBC1001..." oninput="handleInput()" onkeyup="if(event.key === 'Enter') searchSchool()">
         <button id="clear-btn" class="clear-btn" onclick="clearSearch()" type="button" title="Kosongkan"><i class="fa-solid fa-circle-xmark"></i></button>
         <button onclick="searchSchool()" class="search-btn" type="button">
           <i class="fa-solid fa-search me-1"></i> Cari
         </button>
       </div>
-      <div id="loading-spinner" class="mt-2 text-muted" style="font-size: 0.85rem;">
-        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-        Sedang memuatkan pangkalan data...
+      
+      <!-- 加载提示与数据库最后更新时间提示 -->
+      <div class="d-flex justify-content-between align-items-center mt-1">
+        <div id="loading-spinner" class="text-muted" style="font-size: 0.85rem;">
+          <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+          Sedang memuatkan pangkalan data...
+        </div>
+        <div id="last-updated-box" class="last-updated-text ms-auto d-none">
+          <i class="fa-regular fa-calendar-check me-1 text-primary"></i>Tarikh Kemas Kini Pangkalan Data: <span id="update-date" class="fw-bold text-dark">-</span>
+        </div>
       </div>
     </div>
 
@@ -252,19 +253,14 @@
       <span id="not-found-text" class="fw-semibold">Kod Sekolah tidak dijumpai. Sila pastikan Kod Sekolah adalah betul.</span>
     </div>
 
-    <!-- 4. 查询结果显示卡片 (展示 Column B 到 Column L) -->
+    <!-- 4. 查询结果显示卡片 (已移除 Cetak 按钮) -->
     <div id="result-card" class="result-card d-none">
       <div class="result-header d-flex justify-content-between align-items-center">
         <div>
           <span class="badge bg-primary status-badge mb-1" id="display-col-a">KOD SEKOLAH</span>
           <h3 class="fw-bold text-dark mb-0" id="display-col-b" style="font-size: 1.3rem;">-</h3>
         </div>
-        <div class="d-flex align-items-center gap-2">
-          <button onclick="window.print()" class="btn btn-sm btn-outline-secondary btn-print-action rounded-3 fw-semibold">
-            <i class="fa-solid fa-print me-1"></i> Cetak
-          </button>
-          <span class="badge bg-success status-badge"><i class="fa-solid fa-check-circle me-1"></i>Rekod Dijumpai</span>
-        </div>
+        <span class="badge bg-success status-badge"><i class="fa-solid fa-check-circle me-1"></i>Rekod Dijumpai</span>
       </div>
 
       <div class="card-body p-3">
@@ -291,12 +287,28 @@
       const spinner = document.getElementById('loading-spinner');
       const errBanner = document.getElementById('db-error-banner');
       const errText = document.getElementById('db-error-text');
+      const updatedBox = document.getElementById('last-updated-box');
+      const updateDateEl = document.getElementById('update-date');
 
       try {
         const response = await fetch('./database.xlsx?v=' + new Date().getTime());
         if (!response.ok) {
           throw new Error("Gagal mengambil fail 'database.xlsx'. Sila pastikan nama fail di GitHub adalah 'database.xlsx'.");
         }
+
+        // 获取并格式化文件最后修改时间 (Tarikh Kemas Kini)
+        const lastModifiedHeader = response.headers.get('Last-Modified');
+        if (lastModifiedHeader) {
+          const modDate = new Date(lastModifiedHeader);
+          const formattedDate = modDate.toLocaleDateString('ms-MY', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+          updateDateEl.innerText = formattedDate;
+          updatedBox.classList.remove('d-none');
+        }
+
         const arrayBuffer = await response.arrayBuffer();
         const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
         
@@ -380,29 +392,3 @@
           if (rawVal !== '') {
             if (rawVal.toLowerCase().startsWith('http://') || rawVal.toLowerCase().startsWith('https://')) {
               displayContent = `<a href="${rawVal}" target="_blank" class="download-btn"><i class="fa-solid fa-download"></i> Download</a>`;
-            } else {
-              displayContent = rawVal;
-            }
-          }
-
-          cardsHTML += `
-            <div class="col-md-6">
-              <div class="info-box">
-                <div class="info-label">${labelName}</div>
-                <div class="info-value">${displayContent}</div>
-              </div>
-            </div>
-          `;
-        }
-
-        container.innerHTML = cardsHTML;
-        resultCard.classList.remove('d-none');
-      } else {
-        resultCard.classList.add('d-none');
-        document.getElementById('not-found-text').innerText = `Kod Sekolah "${inputCode}" tidak dijumpai dalam pangkalan data.`;
-        notFoundMsg.classList.remove('d-none');
-      }
-    }
-  </script>
-</body>
-</html>
