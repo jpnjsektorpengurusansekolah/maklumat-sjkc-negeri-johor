@@ -127,7 +127,6 @@
 
     .search-btn:hover {
       background-color: #062663;
-      border-color: #062663;
     }
 
     .last-updated-text {
@@ -225,10 +224,10 @@
     <!-- 2. 搜索框区域 -->
     <div class="card search-card p-3 mb-3">
       <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.9rem;">
-        <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>Masukkan Kod Sekolah:
+        <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>Masukkan Kod atau Nama Sekolah:
       </label>
       <div class="search-row mb-2">
-        <input id="search-code" type="text" class="search-input" placeholder="Contoh: JBC1001..." oninput="handleInput()" onkeyup="if(event.key === 'Enter') searchSchool()">
+        <input id="search-code" type="text" class="search-input" placeholder="Contoh: JBC1030 atau CHIEN CHI..." oninput="handleInput()" onkeyup="if(event.key === 'Enter') searchSchool()">
         <button id="clear-btn" class="clear-btn" onclick="clearSearch()" type="button" title="Kosongkan"><i class="fa-solid fa-circle-xmark"></i></button>
         <button onclick="searchSchool()" class="search-btn" type="button">
           <i class="fa-solid fa-search me-1"></i> Cari
@@ -250,7 +249,7 @@
     <!-- 3. 未找到数据提示 -->
     <div id="not-found-msg" class="alert alert-warning text-center rounded-4 shadow-sm d-none py-3 mb-3">
       <i class="fa-solid fa-circle-exclamation me-2 fs-5 align-middle"></i>
-      <span id="not-found-text" class="fw-semibold">Kod Sekolah tidak dijumpai. Sila pastikan Kod Sekolah adalah betul.</span>
+      <span id="not-found-text" class="fw-semibold">Rekod tidak dijumpai. Sila pastikan carian adalah betul.</span>
     </div>
 
     <!-- 4. 查询结果显示卡片 -->
@@ -281,10 +280,9 @@
 
     window.onload = function() {
       fetchDatabase();
-      fetchCommitDate(); // 独立获取 GitHub 更新日期
+      fetchCommitDate();
     };
 
-    // 获取 database.xlsx 的 GitHub Commit 提交日期
     async function fetchCommitDate() {
       const dateEl = document.getElementById('update-date-text');
       try {
@@ -310,7 +308,6 @@
       } catch (e) {
         console.log("Gagal mengambil tarikh API GitHub:", e);
       }
-      // 备用兜底日期
       dateEl.innerText = new Date().toLocaleDateString('ms-MY', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
@@ -390,20 +387,25 @@
     }
 
     function searchSchool() {
-      const inputCode = document.getElementById('search-code').value.trim().toUpperCase();
+      const query = document.getElementById('search-code').value.trim().toUpperCase();
       const resultCard = document.getElementById('result-card');
       const notFoundMsg = document.getElementById('not-found-msg');
       const container = document.getElementById('details-container');
 
-      if (!inputCode) {
+      if (!query) {
         resultCard.classList.add('d-none');
         notFoundMsg.classList.add('d-none');
         return;
       }
 
+      // 智能匹配：支持搜 Kod Sekolah (Column A) 或者 搜学校名称 (Column C / Column D)
       const matchedRow = schoolDatabase.find(row => {
-        if (!row || row[0] === undefined || row[0] === null) return false;
-        return String(row[0]).trim().toUpperCase() === inputCode;
+        if (!row) return false;
+        const colA = row[0] ? String(row[0]).trim().toUpperCase() : '';
+        const colC = row[2] ? String(row[2]).trim().toUpperCase() : '';
+        const colD = row[3] ? String(row[3]).trim().toUpperCase() : '';
+
+        return colA === query || (colA && colA.includes(query)) || (colC && colC.includes(query)) || (colD && colD.includes(query));
       });
 
       if (matchedRow) {
@@ -444,7 +446,7 @@
         resultCard.classList.remove('d-none');
       } else {
         resultCard.classList.add('d-none');
-        document.getElementById('not-found-text').innerText = `Kod Sekolah "${inputCode}" tidak dijumpai dalam pangkalan data.`;
+        document.getElementById('not-found-text').innerText = `Carian "${query}" tidak dijumpai dalam pangkalan data.`;
         notFoundMsg.classList.remove('d-none');
       }
     }
