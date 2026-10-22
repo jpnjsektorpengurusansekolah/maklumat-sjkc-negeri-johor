@@ -172,9 +172,8 @@
       word-break: break-word;
     }
 
-    /* 专为数字设计的加大高亮样式 */
     .info-value-number {
-      font-size: 1.4rem !important;
+      font-size: 1.35rem !important;
       font-weight: 800 !important;
       color: #0a3d91 !important;
     }
@@ -235,7 +234,7 @@
       <span id="db-error-text">Ralat memuatkan pangkalan data. Sila pastikan fail database.xlsx wujud.</span>
     </div>
 
-    <!-- 2. 搜索框区域 (仅用 Kod Sekolah) -->
+    <!-- 2. 搜索框区域 (仅 Kod Sekolah) -->
     <div class="card search-card p-3 mb-3">
       <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.9rem;">
         <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>Masukkan Kod Sekolah:
@@ -248,7 +247,7 @@
         </button>
       </div>
       
-      <!-- 加载提示与更新日期 -->
+      <!-- 加载提示与数据库最后更新时间提示 -->
       <div class="d-flex justify-content-between align-items-center mt-1">
         <div id="loading-spinner" class="text-muted" style="font-size: 0.85rem;">
           <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
@@ -266,65 +265,4 @@
       <span id="not-found-text" class="fw-semibold">Kod Sekolah tidak dijumpai. Sila pastikan Kod Sekolah adalah betul.</span>
     </div>
 
-    <!-- 4. 查询结果显示卡片 -->
-    <div id="result-card" class="result-card d-none">
-      <!-- 顶部聚焦展示：大标题显示学校名称 (Col C) 与 华文校名 (Col D)，标有 Kod Sekolah & PPD 标签 -->
-      <div class="result-header">
-        <div class="d-flex justify-content-between align-items-start mb-2">
-          <div class="d-flex gap-2 align-items-center flex-wrap">
-            <span class="badge bg-primary tag-badge" id="display-col-a">KOD SEKOLAH</span>
-            <span class="badge bg-secondary tag-badge" id="display-col-b">PPD</span>
-          </div>
-          <span class="badge bg-success status-badge"><i class="fa-solid fa-check-circle me-1"></i>Rekod Dijumpai</span>
-        </div>
-        <!-- 重点：大字展示学校名称与华文校名 -->
-        <h3 class="fw-bold text-dark mb-1" id="display-main-title" style="font-size: 1.35rem;">-</h3>
-        <div class="fw-bold text-primary" id="display-sub-title" style="font-size: 1.1rem;"></div>
-      </div>
-
-      <div class="card-body p-3">
-        <!-- 动态生成 Column E 到 Column L 的其他属性 -->
-        <div class="row g-3" id="details-container"></div>
-      </div>
-    </div>
-
-    <!-- 页脚版权 -->
-    <div class="text-center text-muted mt-4" style="font-size: 0.8rem;">
-      Hak Cipta Terpelihara © Jabatan Pendidikan Negeri Johor | Unit Prasekolah dan Rendah
-    </div>
-
-  </div>
-
-  <script>
-    let schoolDatabase = [];
-    let headers = [];
-
-    window.onload = function() {
-      fetchDatabase();
-      fetchCommitDate();
-    };
-
-    async function fetchCommitDate() {
-      const dateEl = document.getElementById('update-date-text');
-      try {
-        const repoUser = "jpnjsektorpengurusansekolah";
-        const repoName = "maklumat-sjkc-negeri-johor";
-        const apiUrl = `https://api.github.com/repos/${repoUser}/${repoName}/commits?path=database.xlsx&page=1&per_page=1`;
-
-        const res = await fetch(apiUrl);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.length > 0) {
-            const commitDateStr = data[0].commit.committer.date;
-            const modDate = new Date(commitDateStr);
-            const formattedDate = modDate.toLocaleDateString('ms-MY', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric'
-            });
-            dateEl.innerText = formattedDate;
-            return;
-          }
-        }
-      } catch (e) {
-        console.log("Gagal mengambil tarikh API GitHub:", e);
+    <!-- 4.
