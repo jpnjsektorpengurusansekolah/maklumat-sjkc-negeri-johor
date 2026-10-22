@@ -17,7 +17,7 @@
       color: #2c3e50;
     }
 
-    /* 吸顶固定 Header 悬浮效果 */
+    /* 吸顶固定 Header */
     .sticky-header-wrapper {
       position: sticky;
       top: 0;
@@ -202,7 +202,7 @@
 
   <div class="container pb-5" style="max-width: 860px;">
     
-    <!-- 1. 悬浮固定 Header 模块 -->
+    <!-- 1. 悬浮固定 Header -->
     <div class="sticky-header-wrapper">
       <div class="header-box text-center">
         <div class="d-flex align-items-center justify-content-center gap-3">
@@ -216,10 +216,10 @@
       </div>
     </div>
 
-    <!-- 全局状态报错 Banner -->
+    <!-- 报错提示栏 -->
     <div id="db-error-banner" class="alert alert-danger text-center rounded-4 shadow-sm d-none mb-3 py-2">
       <i class="fa-solid fa-triangle-exclamation me-2"></i>
-      <span id="db-error-text">Ralat memuatkan database.xlsx</span>
+      <span id="db-error-text">Ralat memuatkan pangkalan data. Sila pastikan fail database.xlsx wujud.</span>
     </div>
 
     <!-- 2. 搜索框区域 -->
@@ -235,14 +235,14 @@
         </button>
       </div>
       
-      <!-- 加载提示与数据库最后更新时间提示 -->
+      <!-- 加载提示与数据库成功加载提示 -->
       <div class="d-flex justify-content-between align-items-center mt-1">
         <div id="loading-spinner" class="text-muted" style="font-size: 0.85rem;">
           <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
           Sedang memuatkan pangkalan data...
         </div>
         <div id="last-updated-box" class="last-updated-text ms-auto d-none">
-          <i class="fa-regular fa-calendar-check me-1 text-primary"></i>Tarikh Kemas Kini Pangkalan Data: <span id="update-date" class="fw-bold text-dark">-</span>
+          <i class="fa-regular fa-circle-check me-1 text-success"></i>Pangkalan Data: <span class="fw-bold text-dark">Sedia Digunakan</span>
         </div>
       </div>
     </div>
@@ -253,7 +253,7 @@
       <span id="not-found-text" class="fw-semibold">Kod Sekolah tidak dijumpai. Sila pastikan Kod Sekolah adalah betul.</span>
     </div>
 
-    <!-- 4. 查询结果显示卡片 (已移除 Cetak 按钮) -->
+    <!-- 4. 查询结果显示卡片 -->
     <div id="result-card" class="result-card d-none">
       <div class="result-header d-flex justify-content-between align-items-center">
         <div>
@@ -283,56 +283,61 @@
       fetchDatabase();
     };
 
-    async function fetchDatabase() {
+    function fetchDatabase() {
       const spinner = document.getElementById('loading-spinner');
       const errBanner = document.getElementById('db-error-banner');
       const errText = document.getElementById('db-error-text');
       const updatedBox = document.getElementById('last-updated-box');
-      const updateDateEl = document.getElementById('update-date');
 
-      try {
-        const response = await fetch('./database.xlsx?v=' + new Date().getTime());
-        if (!response.ok) {
-          throw new Error("Gagal mengambil fail 'database.xlsx'. Sila pastikan nama fail di GitHub adalah 'database.xlsx'.");
-        }
+      // 使用 XMLHttpRequest 加强兼容性，防止 Fetch API 挂起
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', './database.xlsx?v=' + new Date().getTime(), true);
+      xhr.responseType = 'arraybuffer';
 
-        // 获取并格式化文件最后修改时间 (Tarikh Kemas Kini)
-        const lastModifiedHeader = response.headers.get('Last-Modified');
-        if (lastModifiedHeader) {
-          const modDate = new Date(lastModifiedHeader);
-          const formattedDate = modDate.toLocaleDateString('ms-MY', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          });
-          updateDateEl.innerText = formattedDate;
-          updatedBox.classList.remove('d-none');
-        }
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          try {
+            const data = new Uint8Array(xhr.response);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            
+            const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
 
-        const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
-        
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
-        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-
-        if (rows && rows.length > 0) {
-          headers = rows[0] || [];
-          schoolDatabase = rows.slice(1);
-          if (errBanner) errBanner.classList.add('d-none');
+            if (rows && rows.length > 0) {
+              headers = rows[0] || [];
+              schoolDatabase = rows.slice(1);
+              
+              if (errBanner) errBanner.classList.add('d-none');
+              if (updatedBox) updatedBox.classList.remove('d-none');
+            } else {
+              throw new Error("Fail 'database.xlsx' kosong!");
+            }
+          } catch (e) {
+            if (errBanner && errText) {
+              errText.innerText = "Ralat membaca kandungan Excel: " + e.message;
+              errBanner.classList.remove('d-none');
+            }
+          }
         } else {
-          throw new Error("Fail 'database.xlsx' kosong!");
+          if (errBanner && errText) {
+            errText.innerText = "Fail 'database.xlsx' tidak dijumpai dalam GitHub repository.";
+            errBanner.classList.remove('d-none');
+          }
         }
-      } catch (err) {
-        console.error("Status Database:", err.message);
+        if (spinner) spinner.classList.add('d-none');
+      };
+
+      xhr.onerror = function() {
         if (errBanner && errText) {
-          errText.innerText = err.message;
+          errText.innerText = "Ralat Rangkaian. Gagal memuatkan database.xlsx.";
           errBanner.classList.remove('d-none');
         }
-      } finally {
         if (spinner) spinner.classList.add('d-none');
-      }
+      };
+
+      xhr.send();
     };
 
     function handleInput() {
@@ -392,3 +397,29 @@
           if (rawVal !== '') {
             if (rawVal.toLowerCase().startsWith('http://') || rawVal.toLowerCase().startsWith('https://')) {
               displayContent = `<a href="${rawVal}" target="_blank" class="download-btn"><i class="fa-solid fa-download"></i> Download</a>`;
+            } else {
+              displayContent = rawVal;
+            }
+          }
+
+          cardsHTML += `
+            <div class="col-md-6">
+              <div class="info-box">
+                <div class="info-label">${labelName}</div>
+                <div class="info-value">${displayContent}</div>
+              </div>
+            </div>
+          `;
+        }
+
+        container.innerHTML = cardsHTML;
+        resultCard.classList.remove('d-none');
+      } else {
+        resultCard.classList.add('d-none');
+        document.getElementById('not-found-text').innerText = `Kod Sekolah "${inputCode}" tidak dijumpai dalam pangkalan data.`;
+        notFoundMsg.classList.remove('d-none');
+      }
+    }
+  </script>
+</body>
+</html>
