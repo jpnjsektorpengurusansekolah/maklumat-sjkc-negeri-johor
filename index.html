@@ -4,19 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistem Carian Maklumat SJKC Johor</title>
-  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- FontAwesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <!-- SheetJS -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     body {
       background-color: #f0f3f8;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: #2c3e50;
     }
-
     .sticky-header-wrapper {
       position: sticky;
       top: 0;
@@ -25,7 +21,6 @@
       padding-top: 15px;
       padding-bottom: 10px;
     }
-
     .header-box {
       background: linear-gradient(135deg, #0a3d91 0%, #062663 100%);
       color: white;
@@ -34,20 +29,17 @@
       box-shadow: 0 8px 20px rgba(10, 61, 145, 0.25);
       border-bottom: 3px solid #f1c40f;
     }
-
     .header-logo {
       max-height: 55px;
       width: auto;
       object-fit: contain;
     }
-
     .sys-title {
       font-size: 1.35rem;
       font-weight: 800;
       margin-bottom: 2px;
       color: #ffffff;
     }
-
     .org-subtitle {
       font-size: 0.78rem;
       font-weight: 700;
@@ -55,7 +47,6 @@
       text-transform: uppercase;
       margin-bottom: 2px;
     }
-
     .org-unit {
       font-size: 0.7rem;
       font-weight: 500;
@@ -63,14 +54,12 @@
       text-transform: uppercase;
       margin-bottom: 0;
     }
-
     .search-card {
       border-radius: 16px;
       border: 1px solid rgba(0,0,0,0.05);
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
       background: #ffffff;
     }
-
     .search-row {
       display: flex !important;
       flex-direction: row !important;
@@ -78,7 +67,6 @@
       align-items: center !important;
       position: relative;
     }
-
     .search-input {
       font-size: 1rem;
       border-radius: 10px 0 0 10px !important;
@@ -89,12 +77,10 @@
       width: 100% !important;
       outline: none;
     }
-
     .search-input:focus {
       border-color: #0a3d91;
       background-color: #ffffff;
     }
-
     .clear-btn {
       position: absolute;
       right: 110px;
@@ -107,11 +93,290 @@
       display: none;
       font-size: 0.9rem;
     }
-
     .clear-btn:hover {
       color: #e53e3e;
     }
-
     .search-btn {
       border-radius: 0 10px 10px 0 !important;
-      padding: 12px 28px
+      padding: 12px 28px !important;
+      font-weight: 600;
+      background-color: #0a3d91;
+      border: 2px solid #0a3d91;
+      color: white !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+      cursor: pointer;
+    }
+    .search-btn:hover {
+      background-color: #062663;
+    }
+    .last-updated-text {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .result-card {
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      background: white;
+      overflow: hidden;
+    }
+    .result-header {
+      background: #f8fafc;
+      border-bottom: 2px solid #edf2f7;
+      padding: 18px 24px;
+    }
+    .info-box {
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 12px 16px;
+      border: 1px solid #edf2f7;
+      height: 100%;
+    }
+    .info-label {
+      font-size: 0.75rem;
+      color: #64748b;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .info-value {
+      font-size: 1rem;
+      color: #0f172a;
+      font-weight: 600;
+      word-break: break-word;
+    }
+    .info-value-number {
+      font-size: 1.35rem !important;
+      font-weight: 800 !important;
+      color: #0a3d91 !important;
+    }
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #0d6efd;
+      color: white !important;
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .download-btn:hover {
+      background-color: #0b5ed7;
+    }
+    .status-badge {
+      font-size: 0.78rem;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .tag-badge {
+      font-size: 0.8rem;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+    }
+    .sub-title-chinese {
+      color: #3182ce;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container pb-5" style="max-width: 860px;">
+    
+    <!-- Header -->
+    <div class="sticky-header-wrapper">
+      <div class="header-box text-center">
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          <img src="./logo.png" alt="Logo JPNJ" class="header-logo" onerror="this.style.display='none'">
+          <div class="text-start">
+            <h1 class="sys-title">Sistem Carian Maklumat SJKC Johor</h1>
+            <div class="org-subtitle">JABATAN PENDIDIKAN NEGERI JOHOR</div>
+            <div class="org-unit">SEKTOR PENGURUSAN SEKOLAH | UNIT PRASEKOLAH DAN RENDAH</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kotak Carian -->
+    <div class="card search-card p-3 my-3">
+      <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.9rem;">
+        <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>Masukkan Kod Sekolah:
+      </label>
+      <div class="search-row mb-2">
+        <input id="search-code" type="text" class="search-input" placeholder="Contoh: JBC1001..." oninput="handleInput()" onkeyup="if(event.key === 'Enter') searchSchool()">
+        <button id="clear-btn" class="clear-btn" onclick="clearSearch()" type="button" title="Kosongkan"><i class="fa-solid fa-circle-xmark"></i></button>
+        <button onclick="searchSchool()" class="search-btn" type="button">
+          <i class="fa-solid fa-search me-1"></i> Cari
+        </button>
+      </div>
+      
+      <div class="d-flex justify-content-between align-items-center mt-1">
+        <div id="db-status-container" class="text-success" style="font-size: 0.85rem; font-weight: 600;">
+          <i class="fa-solid fa-circle-check me-1"></i>Pangkalan Data: Sedia Digunakan
+        </div>
+        <div id="last-updated-box" class="last-updated-text ms-auto">
+          <i class="fa-regular fa-calendar-check me-1 text-primary"></i>Tarikh Kemas Kini Pangkalan Data: <span id="update-date-text" class="fw-bold text-dark">22/10/2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mesej Ralat / Tidak Dijumpai -->
+    <div id="not-found-msg" class="alert alert-warning text-center rounded-4 shadow-sm d-none py-3 mb-3">
+      <i class="fa-solid fa-circle-exclamation me-2 fs-5 align-middle"></i>
+      <span id="not-found-text" class="fw-semibold">Kod Sekolah tidak dijumpai. Sila pastikan Kod Sekolah adalah betul.</span>
+    </div>
+
+    <!-- Kad Keputusan -->
+    <div id="result-card" class="result-card d-none">
+      <div class="result-header">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex gap-2 align-items-center flex-wrap">
+            <span class="badge bg-primary tag-badge" id="display-col-a">KOD SEKOLAH</span>
+            <span class="badge bg-secondary tag-badge" id="display-col-b">PPD</span>
+          </div>
+          <span class="badge bg-success status-badge"><i class="fa-solid fa-check-circle me-1"></i>Rekod Dijumpai</span>
+        </div>
+        <h3 class="fw-bold text-dark mb-1" id="display-main-title" style="font-size: 1.35rem;">-</h3>
+        <div class="sub-title-chinese" id="display-sub-title"></div>
+      </div>
+
+      <div class="card-body p-3">
+        <div class="row g-3" id="details-container"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center text-muted mt-4" style="font-size: 0.8rem;">
+      Hak Cipta Terpelihara © Jabatan Pendidikan Negeri Johor | Sektor Pengurusan Sekolah (Unit Prasekolah dan Rendah - SJKC) — Untuk Kegunaan Dalaman Sahaja
+    </div>
+
+  </div>
+
+  <script>
+    var schoolDatabase = [];
+    var headers = [];
+
+    window.onload = function() {
+      fetchDatabase();
+    };
+
+    function fetchDatabase() {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', './database.xlsx?v=' + new Date().getTime(), true);
+      xhr.responseType = 'arraybuffer';
+
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          try {
+            var data = new Uint8Array(xhr.response);
+            var workbook = XLSX.read(data, { type: 'array' });
+            var firstSheet = workbook.SheetNames[0];
+            var worksheet = workbook.Sheets[firstSheet];
+            var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+            if (rows && rows.length > 0) {
+              headers = rows[0] || [];
+              schoolDatabase = rows.slice(1);
+            }
+          } catch (e) {
+            console.error('Ralat membaca fail Excel:', e);
+          }
+        }
+      };
+
+      xhr.send();
+    }
+
+    function handleInput() {
+      var inputEl = document.getElementById('search-code');
+      var clearBtn = document.getElementById('clear-btn');
+      clearBtn.style.display = inputEl.value.trim() !== '' ? 'block' : 'none';
+      searchSchool();
+    }
+
+    function clearSearch() {
+      var inputEl = document.getElementById('search-code');
+      inputEl.value = '';
+      document.getElementById('clear-btn').style.display = 'none';
+      searchSchool();
+      inputEl.focus();
+    }
+
+    function searchSchool() {
+      var inputCode = document.getElementById('search-code').value.trim().toUpperCase();
+      var resultCard = document.getElementById('result-card');
+      var notFoundMsg = document.getElementById('not-found-msg');
+      var container = document.getElementById('details-container');
+
+      if (!inputCode) {
+        resultCard.classList.add('d-none');
+        notFoundMsg.classList.add('d-none');
+        return;
+      }
+
+      var matchedRow = null;
+      for (var i = 0; i < schoolDatabase.length; i++) {
+        var row = schoolDatabase[i];
+        if (row && row[0] !== undefined && row[0] !== null) {
+          if (String(row[0]).trim().toUpperCase() === inputCode) {
+            matchedRow = row;
+            break;
+          }
+        }
+      }
+
+      if (matchedRow) {
+        notFoundMsg.classList.add('d-none');
+
+        document.getElementById('display-col-a').innerText = matchedRow[0] || '-';
+        document.getElementById('display-col-b').innerText = matchedRow[1] || '-';
+        document.getElementById('display-main-title').innerText = matchedRow[2] || '-';
+        document.getElementById('display-sub-title').innerText = matchedRow[3] || '';
+
+        var cardsHTML = '';
+        for (var c = 4; c < headers.length; c++) {
+          var labelName = headers[c] || ('Column ' + String.fromCharCode(65 + c));
+          var rawVal = (matchedRow[c] !== undefined && matchedRow[c] !== null) ? String(matchedRow[c]).trim() : '';
+
+          var displayContent = '-';
+          var isNumeric = false;
+
+          if (rawVal !== '') {
+            if (rawVal.toLowerCase().indexOf('http://') === 0 || rawVal.toLowerCase().indexOf('https://') === 0) {
+              displayContent = '<a href="' + rawVal + '" target="_blank" class="download-btn"><i class="fa-solid fa-download"></i> Download</a>';
+            } else {
+              displayContent = rawVal;
+              if (/^\d+$/.test(rawVal)) {
+                isNumeric = true;
+              }
+            }
+          }
+
+          var valueClass = isNumeric ? 'info-value info-value-number' : 'info-value';
+
+          cardsHTML += '<div class="col-md-6">' +
+            '<div class="info-box">' +
+              '<div class="info-label">' + labelName + '</div>' +
+              '<div class="' + valueClass + '">' + displayContent + '</div>' +
+            '</div>' +
+          '</div>';
+        }
+
+        container.innerHTML = cardsHTML;
+        resultCard.classList.remove('d-none');
+      } else {
+        resultCard.classList.add('d-none');
+        document.getElementById('not-found-text').innerText = 'Kod Sekolah "' + inputCode + '" tidak dijumpai dalam pangkalan data.';
+        notFoundMsg.classList.remove('d-none');
+      }
+    }
+  </script>
+</body>
+</html>
