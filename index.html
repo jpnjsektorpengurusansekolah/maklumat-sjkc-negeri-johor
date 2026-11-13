@@ -222,12 +222,12 @@
           <i class="fa-solid fa-circle-check me-1"></i>Pangkalan Data: Sedia Digunakan
         </div>
         <div id="last-updated-box" class="last-updated-text ms-auto">
-          <i class="fa-regular fa-calendar-check me-1 text-primary"></i>Tarikh Kemas Kini Pangkalan Data: <span id="update-date-text" class="fw-bold text-dark">22/10/2026</span>
+          <i class="fa-regular fa-calendar-check me-1 text-primary"></i>Tarikh Kemas Kini Pangkalan Data: <span id="update-date-text" class="fw-bold text-dark">13/11/2026</span>
         </div>
       </div>
     </div>
 
-    <!-- Mesej Ralat / Tidak Dijumpai -->
+    <!-- Mesej Tidak Dijumpai -->
     <div id="not-found-msg" class="alert alert-warning text-center rounded-4 shadow-sm d-none py-3 mb-3">
       <i class="fa-solid fa-circle-exclamation me-2 fs-5 align-middle"></i>
       <span id="not-found-text" class="fw-semibold">Kod Sekolah tidak dijumpai. Sila pastikan Kod Sekolah adalah betul.</span>
@@ -265,7 +265,26 @@
 
     window.onload = function() {
       fetchDatabase();
+      fetchGitHubDate();
     };
+
+    function fetchGitHubDate() {
+      var dateEl = document.getElementById('update-date-text');
+      fetch('https://api.github.com/repos/jpnjsektorpengurusansekolah/maklumat-sjkc-negeri-johor/commits?path=database.xlsx&page=1&per_page=1')
+        .then(function(res) { return res.ok ? res.json() : null; })
+        .then(function(data) {
+          if (data && data.length > 0 && data[0].commit && data[0].commit.committer) {
+            var d = new Date(data[0].commit.committer.date);
+            var day = ('0' + d.getDate()).slice(-2);
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            var year = d.getFullYear();
+            dateEl.innerText = day + '/' + month + '/' + year;
+          }
+        })
+        .catch(function() {
+          // Kekalkan tarikh lalai jika rangkaian/API lambat
+        });
+    }
 
     function fetchDatabase() {
       var xhr = new XMLHttpRequest();
