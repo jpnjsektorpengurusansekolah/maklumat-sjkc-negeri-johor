@@ -3,722 +3,399 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>e-RPH SJKC Pandan | Sistem Rekod Penghantaran RPH</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Sistem Carian Maklumat SJKC Johor</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    body {
+      background-color: #f0f3f8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #2c3e50;
+    }
+    .sticky-header-wrapper {
+      position: sticky;
+      top: 0;
+      z-index: 1020;
+      background-color: #f0f3f8;
+      padding-top: 15px;
+      padding-bottom: 10px;
+    }
+    .header-box {
+      background: linear-gradient(135deg, #0a3d91 0%, #062663 100%);
+      color: white;
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 8px 20px rgba(10, 61, 145, 0.25);
+      border-bottom: 3px solid #f1c40f;
+    }
+    .header-logo {
+      max-height: 55px;
+      width: auto;
+      object-fit: contain;
+    }
+    .sys-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 2px;
+      color: #ffffff;
+    }
+    .org-subtitle {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #f1c40f;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .org-unit {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+      margin-bottom: 0;
+    }
+    .search-card {
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.05);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+      background: #ffffff;
+    }
+    .search-row {
+      display: flex !important;
+      flex-direction: row !important;
+      width: 100% !important;
+      align-items: center !important;
+      position: relative;
+    }
+    .search-input {
+      font-size: 1rem;
+      border-radius: 10px 0 0 10px !important;
+      padding: 12px 40px 12px 18px;
+      border: 2px solid #e2e8f0;
+      background-color: #f8fafc;
+      flex: 1 1 auto !important;
+      width: 100% !important;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: #0a3d91;
+      background-color: #ffffff;
+    }
+    .clear-btn {
+      position: absolute;
+      right: 110px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: #a0aec0;
+      cursor: pointer;
+      display: none;
+      font-size: 0.9rem;
+    }
+    .clear-btn:hover {
+      color: #e53e3e;
+    }
+    .search-btn {
+      border-radius: 0 10px 10px 0 !important;
+      padding: 12px 28px !important;
+      font-weight: 600;
+      background-color: #0a3d91;
+      border: 2px solid #0a3d91;
+      color: white !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+      cursor: pointer;
+    }
+    .search-btn:hover {
+      background-color: #062663;
+    }
+    .last-updated-text {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .result-card {
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      background: white;
+      overflow: hidden;
+    }
+    .result-header {
+      background: #f8fafc;
+      border-bottom: 2px solid #edf2f7;
+      padding: 18px 24px;
+    }
+    .info-box {
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 12px 16px;
+      border: 1px solid #edf2f7;
+      height: 100%;
+    }
+    .info-label {
+      font-size: 0.75rem;
+      color: #64748b;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .info-value {
+      font-size: 1rem;
+      color: #0f172a;
+      font-weight: 600;
+      word-break: break-word;
+    }
+    .info-value-number {
+      font-size: 1.35rem !important;
+      font-weight: 800 !important;
+      color: #0a3d91 !important;
+    }
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #0d6efd;
+      color: white !important;
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .download-btn:hover {
+      background-color: #0b5ed7;
+    }
+    .status-badge {
+      font-size: 0.78rem;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .tag-badge {
+      font-size: 0.8rem;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+    }
+    .sub-title-chinese {
+      color: #3182ce;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans pb-20">
+<body>
 
-  <!-- Header (Melekat di Atas / Sticky) -->
-  <header class="sticky top-0 z-40 bg-blue-900 text-white py-4 shadow-lg">
-    <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
-      <div class="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4">
-        <img src="logo.png" alt="Logo SJKC Pandan" class="w-16 h-16 object-contain bg-white rounded-full p-1 shadow-sm">
-        <div>
-          <p class="text-amber-300 font-bold text-sm md:text-base tracking-wider uppercase">
-            SEKOLAH JENIS KEBANGSAAN CINA PANDAN
-          </p>
-          <h1 class="text-xl md:text-2xl font-bold tracking-wide">
-            SISTEM REKOD PENGHANTARAN RPH
-          </h1>
-          <p class="text-blue-200 text-xs md:text-sm">
-            Dashboard Pemantauan & Semakan Mingguan
-          </p>
+  <div class="container pb-5" style="max-width: 860px;">
+    
+    <!-- Header -->
+    <div class="sticky-header-wrapper">
+      <div class="header-box text-center">
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          <img src="./logo.png" alt="Logo JPNJ" class="header-logo" onerror="this.style.display='none'">
+          <div class="text-start">
+            <h1 class="sys-title">Sistem Carian Maklumat SJKC Johor</h1>
+            <div class="org-subtitle">JABATAN PENDIDIKAN NEGERI JOHOR</div>
+            <div class="org-unit">SEKTOR PENGURUSAN SEKOLAH | UNIT PRASEKOLAH DAN RENDAH</div>
+          </div>
         </div>
       </div>
-      <div id="adminPanel">
-        <button onclick="bukaModalAdmin()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold px-4 py-2 rounded-lg shadow transition">
-          Log Masuk Pentadbir
+    </div>
+
+    <!-- Kotak Carian -->
+    <div class="card search-card p-3 my-3">
+      <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.9rem;">
+        <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>Masukkan Kod Sekolah:
+      </label>
+      <div class="search-row mb-2">
+        <input id="search-code" type="text" class="search-input" placeholder="Contoh: JBC1001..." oninput="handleInput()" onkeyup="if(event.key === 'Enter') searchSchool()">
+        <button id="clear-btn" class="clear-btn" onclick="clearSearch()" type="button" title="Kosongkan"><i class="fa-solid fa-circle-xmark"></i></button>
+        <button onclick="searchSchool()" class="search-btn" type="button">
+          <i class="fa-solid fa-search me-1"></i> Cari
         </button>
       </div>
-    </div>
-  </header>
-
-  <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
-
-    <!-- Banner Petunjuk Minggu Perlu Hantar & Countdown -->
-    <section id="bannerMingguSemasa" class="bg-gradient-to-r from-blue-800 to-indigo-900 text-white p-5 rounded-xl shadow-md border border-blue-700 flex flex-col md:flex-row justify-between items-center gap-4">
-      <div class="text-center md:text-left">
-        <span class="bg-amber-400 text-slate-900 text-xs font-extrabold px-2.5 py-1 rounded uppercase tracking-wider">
-          Sasaran Penghantaran
-        </span>
-        <h2 id="teksMingguPerluHantar" class="text-2xl md:text-3xl font-extrabold mt-2 tracking-tight">
-          Mengesan Minggu Penghantaran...
-        </h2>
-        <p id="teksTarikhAkhir" class="text-blue-200 text-xs md:text-sm mt-1">
-          Sila tunggu sebentar...
-        </p>
-      </div>
-
-      <!-- Kotak Countdown -->
-      <div class="bg-slate-900/60 border border-blue-400/30 rounded-xl px-5 py-3 text-center min-w-[260px]">
-        <p class="text-[11px] text-amber-300 uppercase font-semibold tracking-wider mb-1">
-          Baki Masa Penghantaran
-        </p>
-        <div id="countdownTimer" class="text-xl md:text-2xl font-mono font-bold text-white tracking-wider">
-          --H : --J : --M : --S
+      
+      <div class="d-flex justify-content-between align-items-center mt-1">
+        <div id="db-status-container" class="text-success" style="font-size: 0.85rem; font-weight: 600;">
+          <i class="fa-solid fa-circle-check me-1"></i>Pangkalan Data: Sedia Digunakan
         </div>
-      </div>
-    </section>
-
-    <!-- Borang Muat Naik Guru -->
-    <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-      <h2 class="text-lg font-bold text-blue-900 mb-4 border-b pb-2">Penghantaran RPH Guru</h2>
-      <form id="uploadForm" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium mb-1">Nama Guru (Susunan A–Z)</label>
-          <select id="selectGuru" required class="w-full border border-slate-300 rounded-lg p-2.5 bg-white">
-            <option value="">-- Memuatkan senarai --</option>
-          </select>
+        <div id="last-updated-box" class="last-updated-text ms-auto">
+          <i class="fa-regular fa-calendar-check me-1 text-primary"></i>Tarikh Kemas Kini Pangkalan Data: <span id="update-date-text" class="fw-bold text-dark">13/11/2026</span>
         </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">4 Digit Akhir No. IC</label>
-          <input type="password" id="pinIC" maxlength="4" pattern="\d{4}" placeholder="Contoh: 5018" required class="w-full border border-slate-300 rounded-lg p-2.5 bg-white">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Minggu</label>
-          <select id="selectMinggu" required class="w-full border border-slate-300 rounded-lg p-2.5 bg-white">
-            <option value="">-- Pilih --</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Fail RPH (&ge;1 fail)</label>
-          <input type="file" id="fileRPH" accept=".xlsx,.xls,.pdf,.doc,.docx" multiple required class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-slate-50">
-        </div>
-        <div class="md:col-span-5">
-          <button type="submit" id="btnHantar" class="w-full md:w-auto bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2.5 px-8 rounded-lg shadow transition">
-            Hantar RPH
-          </button>
-        </div>
-      </form>
-      <p class="text-xs text-slate-500 mt-3">* Pengesahan 4 digit terakhir No. IC diperlukan untuk mengelakkan kesilapan muat naik pada nama guru lain.</p>
-      <p id="statusUpload" class="mt-3 text-sm font-medium hidden"></p>
-    </section>
-
-    <!-- Dashboard Rekod -->
-    <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-        <div>
-          <h2 class="text-lg font-bold text-blue-900">Status Penghantaran Mingguan</h2>
-          <p class="text-xs text-slate-500">Tarikh akhir penghantaran adalah pada setiap hari Sabtu jam 11:59 malam.</p>
-        </div>
-        
-        <!-- Kawalan Penapis (Sesi, Status & Minggu) -->
-        <div class="flex flex-wrap items-center gap-3">
-          <div class="flex items-center gap-2">
-            <label class="text-sm font-semibold">Sesi:</label>
-            <select id="filterSesi" onchange="renderDashboard()" class="border border-slate-300 rounded-lg p-2 font-semibold text-blue-900 bg-blue-50">
-              <option value="SEMUA">Semua Sesi</option>
-              <option value="PAGI">PAGI</option>
-              <option value="PETANG">PETANG</option>
-            </select>
-          </div>
-          <div class="flex items-center gap-2">
-            <label class="text-sm font-semibold">Status:</label>
-            <select id="filterStatus" onchange="renderDashboard()" class="border border-slate-300 rounded-lg p-2 font-semibold text-blue-900 bg-blue-50">
-              <option value="SEMUA">Semua Status</option>
-              <option value="Hantar">Hantar</option>
-              <option value="Lewat">Lewat</option>
-              <option value="Belum Hantar">Belum Hantar</option>
-              <option value="Dikecualikan">Dikecualikan</option>
-            </select>
-          </div>
-          <div class="flex items-center gap-2">
-            <label class="text-sm font-semibold">Minggu:</label>
-            <select id="filterMinggu" onchange="renderDashboard()" class="border border-slate-300 rounded-lg p-2 font-semibold text-blue-900 bg-blue-50"></select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Ringkasan Statistik (4 Kotak) -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-center">
-        <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-lg">
-          <p class="text-xs text-emerald-700 font-semibold uppercase">Hantar (Tepat Masa)</p>
-          <p id="statHantar" class="text-2xl font-bold text-emerald-700">0</p>
-        </div>
-        <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg">
-          <p class="text-xs text-amber-700 font-semibold uppercase">Lewat (Selepas Sabtu)</p>
-          <p id="statLewat" class="text-2xl font-bold text-amber-700">0</p>
-        </div>
-        <div class="bg-rose-50 border border-rose-200 p-3 rounded-lg">
-          <p class="text-xs text-rose-700 font-semibold uppercase">Belum Hantar</p>
-          <p id="statBelum" class="text-2xl font-bold text-rose-700">0</p>
-        </div>
-        <div class="bg-slate-100 border border-slate-300 p-3 rounded-lg">
-          <p class="text-xs text-slate-700 font-semibold uppercase">Dikecualikan (Cuti/Rasmi)</p>
-          <p id="statKecuali" class="text-2xl font-bold text-slate-700">0</p>
-        </div>
-      </div>
-
-      <!-- Jadual Guru -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-slate-100 text-slate-700 text-sm border-b">
-              <th class="p-3 text-center admin-col hidden">
-                <input type="checkbox" id="checkAll" onchange="pilihSemua(this)" title="Pilih Semua Belum Disemak" class="w-4 h-4 accent-emerald-600 cursor-pointer">
-              </th>
-              <th class="p-3">Bil</th>
-              <th class="p-3">Nama Guru</th>
-              <th class="p-3">Jawatan</th>
-              <th class="p-3">Sesi</th>
-              <th class="p-3">Status Hantar</th>
-              <th class="p-3">Tarikh / Masa</th>
-              <th class="p-3">Status Semakan / Catatan</th>
-              <th class="p-3 text-center admin-col hidden">Tindakan Pentadbir</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody" class="divide-y divide-slate-200 text-sm">
-            <tr><td colspan="9" class="p-6 text-center text-slate-500">Memuatkan data dari pangkalan data...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <footer class="text-center text-xs text-slate-400 pt-2">
-      e-RPH SJKC Pandan &bull; Versi 2.0 
-    </footer>
-
-  </main>
-
-  <!-- Bar Terapung Pengesahan Pukal Pentadbir -->
-  <div id="bulkActionBar" class="fixed bottom-0 inset-x-0 bg-slate-900 text-white py-3 px-4 shadow-2xl z-40 hidden">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
-      <div class="text-sm">
-        <span id="countSelected" class="font-bold text-amber-400 text-base">0</span> rekod guru dipilih untuk pengesahan semakan.
-      </div>
-      <div class="flex gap-2">
-        <button onclick="batalPilihan()" class="px-4 py-2 text-xs bg-slate-700 hover:bg-slate-600 rounded-lg font-semibold">Batal Pilihan</button>
-        <button id="btnSahkanPukal" onclick="sahkanPukal()" class="px-5 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-slate-900 rounded-lg font-bold shadow">
-          ✔ Sahkan Semua Pilihan
-        </button>
       </div>
     </div>
-  </div>
 
-  <!-- Modal Log Masuk Pentadbir -->
-  <div id="modalAdmin" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full mx-4">
-      <h3 class="text-lg font-bold text-slate-800 mb-2">Pengesahan Pentadbir</h3>
-      <p class="text-xs text-slate-500 mb-4">Masukkan No. Kad Pengenalan tanpa sengkang untuk mengaktifkan mod semakan.</p>
-      <input type="password" id="inputIC" placeholder="Contoh: 781010045304" class="w-full border border-slate-300 rounded-lg p-2.5 mb-4">
-      <div class="flex justify-end gap-2">
-        <button onclick="tutupModalAdmin()" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
-        <button onclick="sahkanAdmin()" class="px-4 py-2 text-sm bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-800">Sahkan</button>
+    <!-- Mesej Tidak Dijumpai -->
+    <div id="not-found-msg" class="alert alert-warning text-center rounded-4 shadow-sm d-none py-3 mb-3">
+      <i class="fa-solid fa-circle-exclamation me-2 fs-5 align-middle"></i>
+      <span id="not-found-text" class="fw-semibold">Kod Sekolah tidak dijumpai. Sila pastikan Kod Sekolah adalah betul.</span>
+    </div>
+
+    <!-- Kad Keputusan -->
+    <div id="result-card" class="result-card d-none">
+      <div class="result-header">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex gap-2 align-items-center flex-wrap">
+            <span class="badge bg-primary tag-badge" id="display-col-a">KOD SEKOLAH</span>
+            <span class="badge bg-secondary tag-badge" id="display-col-b">PPD</span>
+          </div>
+          <span class="badge bg-success status-badge"><i class="fa-solid fa-check-circle me-1"></i>Rekod Dijumpai</span>
+        </div>
+        <h3 class="fw-bold text-dark mb-1" id="display-main-title" style="font-size: 1.35rem;">-</h3>
+        <div class="sub-title-chinese" id="display-sub-title"></div>
+      </div>
+
+      <div class="card-body p-3">
+        <div class="row g-3" id="details-container"></div>
       </div>
     </div>
+
+    <!-- Footer -->
+    <div class="text-center text-muted mt-4" style="font-size: 0.8rem;">
+      Hak Cipta Terpelihara © Jabatan Pendidikan Negeri Johor | Sektor Pengurusan Sekolah (Unit Prasekolah dan Rendah - SJKC) — Untuk Kegunaan Dalaman Sahaja
+    </div>
+
   </div>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbztPnFitfaP5kw1NoQk7yi35nQ-W6HYUKu5k-O9W7i4sixlmu07h3GsI278TK3gVeVq/exec";
-    
-    let dataGuru = [];
-    let dataMinggu = [];
-    let dataRekod = [];
-    let adminIC = null;
-    let pemasaCountdown = null;
-    let kaliPertamaMuat = true;
+    var schoolDatabase = [];
+    var headers = [];
 
-    async function loadData() {
-      try {
-        const res = await fetch(`${WEB_APP_URL}?action=getData&t=${new Date().getTime()}`);
-        const json = await res.json();
-        
-        dataGuru = json.guru
-          .filter(g => g[1] && String(g[1]).trim() !== "")
-          .sort((a, b) => String(a[1]).trim().localeCompare(String(b[1]).trim(), 'ms'));
-          
-        dataMinggu = json.minggu;
-        dataRekod = json.rekod;
+    window.onload = function() {
+      fetchDatabase();
+      fetchGitHubDate();
+    };
 
-        isiDropdown();
-        aktifkanMingguSemasaDanCountdown();
-        renderDashboard();
-      } catch (err) {
-        alert("Gagal menyambung ke pangkalan data: " + err);
-      }
+    function fetchGitHubDate() {
+      var dateEl = document.getElementById('update-date-text');
+      fetch('https://api.github.com/repos/jpnjsektorpengurusansekolah/maklumat-sjkc-negeri-johor/commits?path=database.xlsx&page=1&per_page=1')
+        .then(function(res) { return res.ok ? res.json() : null; })
+        .then(function(data) {
+          if (data && data.length > 0 && data[0].commit && data[0].commit.committer) {
+            var d = new Date(data[0].commit.committer.date);
+            var day = ('0' + d.getDate()).slice(-2);
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            var year = d.getFullYear();
+            dateEl.innerText = day + '/' + month + '/' + year;
+          }
+        })
+        .catch(function() {
+          // Kekalkan tarikh lalai jika rangkaian/API lambat
+        });
     }
 
-    function isiDropdown() {
-      const selGuru = document.getElementById("selectGuru");
-      const nilaiSemasaGuru = selGuru.value;
-      selGuru.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
-      dataGuru.forEach(g => {
-        selGuru.innerHTML += `<option value="${g[1]}">${g[1]}</option>`;
-      });
-      if (nilaiSemasaGuru) selGuru.value = nilaiSemasaGuru;
+    function fetchDatabase() {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', './database.xlsx?v=' + new Date().getTime(), true);
+      xhr.responseType = 'arraybuffer';
 
-      const selMinggu = document.getElementById("selectMinggu");
-      const filMinggu = document.getElementById("filterMinggu");
-      const nilaiSemasaFilter = filMinggu.value;
-      
-      selMinggu.innerHTML = '';
-      filMinggu.innerHTML = '';
-      dataMinggu.forEach(m => {
-        if (m[0]) {
-          selMinggu.innerHTML += `<option value="${m[0]}">Minggu ${m[0]}</option>`;
-          filMinggu.innerHTML += `<option value="${m[0]}">Minggu ${m[0]}</option>`;
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          try {
+            var data = new Uint8Array(xhr.response);
+            var workbook = XLSX.read(data, { type: 'array' });
+            var firstSheet = workbook.SheetNames[0];
+            var worksheet = workbook.Sheets[firstSheet];
+            var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+            if (rows && rows.length > 0) {
+              headers = rows[0] || [];
+              schoolDatabase = rows.slice(1);
+            }
+          } catch (e) {
+            console.error('Ralat membaca fail Excel:', e);
+          }
         }
-      });
-      if (nilaiSemasaFilter) filMinggu.value = nilaiSemasaFilter;
-    }
-
-    function aktifkanMingguSemasaDanCountdown() {
-      const sekarang = new Date();
-      const senaraiBernombor = dataMinggu.filter(m => m[0] && m[1] && !isNaN(Number(m[0])));
-      if (senaraiBernombor.length === 0) return;
-
-      let indeksSemasa = senaraiBernombor.length - 1;
-
-      for (let i = 0; i < senaraiBernombor.length; i++) {
-        const tarikhAkhir = new Date(senaraiBernombor[i][1]);
-        tarikhAkhir.setHours(23, 59, 59, 999);
-
-        if (sekarang <= tarikhAkhir) {
-          indeksSemasa = i;
-          break;
-        }
-      }
-
-      const mingguSemasa = senaraiBernombor[indeksSemasa][0];
-      const tarikhTamatSemasa = new Date(senaraiBernombor[indeksSemasa][1]);
-      tarikhTamatSemasa.setHours(23, 59, 59, 999);
-
-      document.getElementById("teksMingguPerluHantar").innerText = `RPH YANG PERLU DIHANTAR: MINGGU ${mingguSemasa}`;
-      
-      const formatTarikh = tarikhTamatSemasa.toLocaleDateString('ms-MY', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-      });
-      document.getElementById("teksTarikhAkhir").innerText = `Tarikh Akhir Penghantaran: ${formatTarikh} (11:59 Malam)`;
-
-      if (kaliPertamaMuat) {
-        document.getElementById("selectMinggu").value = mingguSemasa;
-        document.getElementById("filterMinggu").value = mingguSemasa;
-        kaliPertamaMuat = false;
-      }
-
-      if (pemasaCountdown) clearInterval(pemasaCountdown);
-      
-      const kemasKiniJam = () => {
-        const kini = new Date().getTime();
-        const baki = tarikhTamatSemasa.getTime() - kini;
-        const elTimer = document.getElementById("countdownTimer");
-
-        if (baki <= 0) {
-          elTimer.innerHTML = `<span class="text-rose-400">TEMPOH TAMAT</span>`;
-          clearInterval(pemasaCountdown);
-          return;
-        }
-
-        const hari = Math.floor(baki / (1000 * 60 * 60 * 24));
-        const jam = Math.floor((baki % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minit = Math.floor((baki % (1000 * 60 * 60)) / (1000 * 60));
-        const saat = Math.floor((baki % (1000 * 60)) / 1000);
-
-        const pad = (n) => String(n).padStart(2, '0');
-        elTimer.innerText = `${hari}H : ${pad(jam)}J : ${pad(minit)}M : ${pad(saat)}S`;
       };
 
-      kemasKiniJam();
-      pemasaCountdown = setInterval(kemasKiniJam, 1000);
+      xhr.send();
     }
 
-    function renderDashboard() {
-      const mingguDipilih = document.getElementById("filterMinggu").value;
-      const sesiDipilih = document.getElementById("filterSesi").value;
-      const statusDipilih = document.getElementById("filterStatus").value;
-      const tbody = document.getElementById("tableBody");
-      tbody.innerHTML = "";
-      document.getElementById("checkAll").checked = false;
-      kemasKiniBarPukal();
+    function handleInput() {
+      var inputEl = document.getElementById('search-code');
+      var clearBtn = document.getElementById('clear-btn');
+      clearBtn.style.display = inputEl.value.trim() !== '' ? 'block' : 'none';
+      searchSchool();
+    }
 
-      const guruIkutSesi = dataGuru.filter(g => {
-        if (sesiDipilih === "SEMUA") return true;
-        const sesiGuru = g[3] ? String(g[3]).trim().toUpperCase() : "";
-        return sesiGuru === sesiDipilih;
-      });
+    function clearSearch() {
+      var inputEl = document.getElementById('search-code');
+      inputEl.value = '';
+      document.getElementById('clear-btn').style.display = 'none';
+      searchSchool();
+      inputEl.focus();
+    }
 
-      let hantar = 0, lewat = 0, belum = 0, kecuali = 0;
-      let bilPaparan = 0;
+    function searchSchool() {
+      var inputCode = document.getElementById('search-code').value.trim().toUpperCase();
+      var resultCard = document.getElementById('result-card');
+      var notFoundMsg = document.getElementById('not-found-msg');
+      var container = document.getElementById('details-container');
 
-      guruIkutSesi.forEach(g => {
-        const nama = g[1];
-        const jawatan = g[2];
-        const sesi = g[3] ? String(g[3]).trim().toUpperCase() : "-";
-
-        const rekodGuru = dataRekod.filter(r => r[1] == mingguDipilih && r[2] === nama).pop();
-
-        let statusSemasa = "Belum Hantar";
-        if (rekodGuru) {
-          if (rekodGuru[4] === "Dikecualikan") {
-            statusSemasa = "Dikecualikan";
-            kecuali++;
-          } else if (rekodGuru[4] === "Hantar") {
-            statusSemasa = "Hantar";
-            hantar++;
-          } else {
-            statusSemasa = "Lewat";
-            lewat++;
-          }
-        } else {
-          belum++;
-        }
-
-        if (statusDipilih !== "SEMUA" && statusSemasa !== statusDipilih) {
-          return;
-        }
-
-        bilPaparan++;
-
-        let badgeSesi = sesi === "PAGI" 
-          ? `<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-100 text-sky-800">PAGI</span>`
-          : sesi === "PETANG"
-          ? `<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-100 text-purple-800">PETANG</span>`
-          : `<span class="text-xs text-slate-400">-</span>`;
-
-        let badgeStatus = `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">Belum Hantar</span>`;
-        let tarikhHantar = "-";
-        let statusSemakan = "-";
-        let tindakanAdmin = `
-          <button onclick="kecualikanGuru('${mingguDipilih}', '${nama}')" class="bg-slate-600 hover:bg-slate-700 text-white px-2.5 py-1 rounded text-xs font-semibold">
-            🏷 Kecualikan
-          </button>
-        `;
-        let checkboxHtml = "";
-
-        if (rekodGuru) {
-          const linkFail = rekodGuru[3];
-          const semakan = rekodGuru[5];
-          const penyemak = rekodGuru[6];
-          const catatan = rekodGuru[7] && rekodGuru[7] !== "-" ? rekodGuru[7] : "";
-
-          if (statusSemasa === "Dikecualikan") {
-            badgeStatus = `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-200 text-slate-800">Dikecualikan</span>`;
-            tarikhHantar = "-";
-            statusSemakan = `
-              <div class="text-slate-700 font-semibold">🏷 Dikecualikan</div>
-              <div class="text-[11px] text-slate-500 mt-0.5">Sebab: "${catatan}" (Oleh ${penyemak})</div>
-            `;
-            tindakanAdmin = `
-              <button onclick="batalKecuali('${mingguDipilih}', '${nama}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 rounded text-xs font-semibold">
-                ✖ Batal Kecuali
-              </button>
-            `;
-          } else {
-            tarikhHantar = new Date(rekodGuru[0]).toLocaleString('ms-MY', { dateStyle: 'short', timeStyle: 'short' });
-
-            if (statusSemasa === "Hantar") {
-              badgeStatus = `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Hantar</span>`;
-            } else {
-              badgeStatus = `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Lewat</span>`;
-            }
-
-            if (semakan === "Telah Disemak") {
-              statusSemakan = `<span class="text-emerald-700 font-semibold">✔ Disemak (${penyemak})</span>`;
-            } else if (semakan === "Perlu Pembetulan") {
-              statusSemakan = `
-                <div class="text-rose-700 font-semibold">⚠ Perlu Pembetulan</div>
-                <div class="text-[11px] text-slate-600 mt-0.5">Oleh ${penyemak}: "${catatan}"</div>
-              `;
-            } else {
-              statusSemakan = `<span class="text-slate-400 italic">Menunggu Semakan</span>`;
-            }
-
-            if (semakan !== "Telah Disemak") {
-              checkboxHtml = `<input type="checkbox" value="${nama}" onchange="kemasKiniBarPukal()" class="chk-semak w-4 h-4 accent-emerald-600 cursor-pointer">`;
-            }
-
-            const pecahUrl = String(linkFail).split("\n").filter(u => u.trim() && u.trim() !== "-");
-            let butangFailHtml = pecahUrl.map((url, i) => 
-              `<a href="${url.trim()}" target="_blank" class="bg-sky-600 hover:bg-sky-700 text-white px-2 py-1 rounded text-xs">Fail ${i + 1}</a>`
-            ).join(" ");
-
-            let butangPulangkan = semakan !== "Perlu Pembetulan"
-              ? `<button onclick="pulangkanBahan('${mingguDipilih}', '${nama}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 rounded text-xs font-semibold">↩ Pulangkan</button>`
-              : "";
-
-            tindakanAdmin = `
-              <div class="flex flex-wrap items-center justify-center gap-1.5">
-                ${butangFailHtml}
-                ${butangPulangkan}
-              </div>
-            `;
-          }
-        }
-
-        tbody.innerHTML += `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 text-center admin-col ${adminIC ? '' : 'hidden'}">${checkboxHtml}</td>
-            <td class="p-3 text-slate-500">${bilPaparan}</td>
-            <td class="p-3 font-medium text-slate-900">${nama}</td>
-            <td class="p-3 text-xs text-slate-600">${jawatan}</td>
-            <td class="p-3">${badgeSesi}</td>
-            <td class="p-3">${badgeStatus}</td>
-            <td class="p-3 text-xs text-slate-600">${tarikhHantar}</td>
-            <td class="p-3 text-xs">${statusSemakan}</td>
-            <td class="p-3 text-center admin-col ${adminIC ? '' : 'hidden'}">${tindakanAdmin}</td>
-          </tr>
-        `;
-      });
-
-      if (bilPaparan === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-500 italic">Tiada rekod guru ditemui bagi tapisan yang dipilih.</td></tr>`;
+      if (!inputCode) {
+        resultCard.classList.add('d-none');
+        notFoundMsg.classList.add('d-none');
+        return;
       }
 
-      document.getElementById("statHantar").innerText = hantar;
-      document.getElementById("statLewat").innerText = lewat;
-      document.getElementById("statBelum").innerText = belum;
-      document.getElementById("statKecuali").innerText = kecuali;
-    }
+      var matchedRow = null;
+      for (var i = 0; i < schoolDatabase.length; i++) {
+        var row = schoolDatabase[i];
+        if (row && row[0] !== undefined && row[0] !== null) {
+          if (String(row[0]).trim().toUpperCase() === inputCode) {
+            matchedRow = row;
+            break;
+          }
+        }
+      }
 
-    function pilihSemua(masterCheckbox) {
-      const semuaChk = document.querySelectorAll(".chk-semak");
-      semuaChk.forEach(cb => cb.checked = masterCheckbox.checked);
-      kemasKiniBarPukal();
-    }
+      if (matchedRow) {
+        notFoundMsg.classList.add('d-none');
 
-    function batalPilihan() {
-      document.getElementById("checkAll").checked = false;
-      document.querySelectorAll(".chk-semak").forEach(cb => cb.checked = false);
-      kemasKiniBarPukal();
-    }
+        document.getElementById('display-col-a').innerText = matchedRow[0] || '-';
+        document.getElementById('display-col-b').innerText = matchedRow[1] || '-';
+        document.getElementById('display-main-title').innerText = matchedRow[2] || '-';
+        document.getElementById('display-sub-title').innerText = matchedRow[3] || '';
 
-    function kemasKiniBarPukal() {
-      const dipilih = document.querySelectorAll(".chk-semak:checked").length;
-      const bar = document.getElementById("bulkActionBar");
-      document.getElementById("countSelected").innerText = dipilih;
-      
-      if (dipilih > 0 && adminIC) {
-        bar.classList.remove("hidden");
+        var cardsHTML = '';
+        for (var c = 4; c < headers.length; c++) {
+          var labelName = headers[c] || ('Column ' + String.fromCharCode(65 + c));
+          var rawVal = (matchedRow[c] !== undefined && matchedRow[c] !== null) ? String(matchedRow[c]).trim() : '';
+
+          var displayContent = '-';
+          var isNumeric = false;
+
+          if (rawVal !== '') {
+            if (rawVal.toLowerCase().indexOf('http://') === 0 || rawVal.toLowerCase().indexOf('https://') === 0) {
+              displayContent = '<a href="' + rawVal + '" target="_blank" class="download-btn"><i class="fa-solid fa-download"></i> Download</a>';
+            } else {
+              displayContent = rawVal;
+              if (/^\d+$/.test(rawVal)) {
+                isNumeric = true;
+              }
+            }
+          }
+
+          var valueClass = isNumeric ? 'info-value info-value-number' : 'info-value';
+
+          cardsHTML += '<div class="col-md-6">' +
+            '<div class="info-box">' +
+              '<div class="info-label">' + labelName + '</div>' +
+              '<div class="' + valueClass + '">' + displayContent + '</div>' +
+            '</div>' +
+          '</div>';
+        }
+
+        container.innerHTML = cardsHTML;
+        resultCard.classList.remove('d-none');
       } else {
-        bar.classList.add("hidden");
+        resultCard.classList.add('d-none');
+        document.getElementById('not-found-text').innerText = 'Kod Sekolah "' + inputCode + '" tidak dijumpai dalam pangkalan data.';
+        notFoundMsg.classList.remove('d-none');
       }
     }
-
-    async function sahkanPukal() {
-      const minggu = document.getElementById("filterMinggu").value;
-      const senaraiGuru = Array.from(document.querySelectorAll(".chk-semak:checked")).map(cb => cb.value);
-
-      if (senaraiGuru.length === 0) return;
-      if (!confirm(`Sahkan semakan secara serentak untuk ${senaraiGuru.length} orang guru bagi Minggu ${minggu}?`)) return;
-
-      const btn = document.getElementById("btnSahkanPukal");
-      btn.disabled = true;
-      btn.innerText = "Sedang Menyimpan...";
-
-      try {
-        const res = await fetch(WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "semakPukal",
-            noIC: adminIC,
-            minggu: minggu,
-            senaraiGuru: senaraiGuru
-          })
-        });
-        const result = await res.json();
-
-        if (result.status === "success") {
-          alert(`Berjaya! ${senaraiGuru.length} rekod telah disahkan oleh ${result.admin}.`);
-          await loadData();
-        } else {
-          alert(result.message);
-          adminIC = null;
-          location.reload();
-        }
-      } catch (err) {
-        alert("Ralat sambungan: " + err);
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "✔ Sahkan Semua Pilihan";
-      }
-    }
-
-    async function kecualikanGuru(minggu, namaGuru) {
-      const sebab = prompt(`Tandakan ${namaGuru} sebagai DIKECUALIKAN bagi Minggu ${minggu}.\n\nSila nyatakan sebab pengecualian (Contoh: Cuti Bersalin, Cuti Sakit, Kursus Rasmi):`);
-      if (sebab === null) return;
-      if (sebab.trim() === "") {
-        alert("Sila masukkan sebab pengecualian terlebih dahulu.");
-        return;
-      }
-
-      try {
-        const res = await fetch(WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "kecualikan",
-            noIC: adminIC,
-            minggu: minggu,
-            namaGuru: namaGuru,
-            sebab: sebab.trim()
-          })
-        });
-        const result = await res.json();
-        if (result.status === "success") {
-          await loadData();
-        } else {
-          alert(result.message);
-          adminIC = null;
-          location.reload();
-        }
-      } catch (err) {
-        alert("Ralat sambungan: " + err);
-      }
-    }
-
-    async function batalKecuali(minggu, namaGuru) {
-      if (!confirm(`Batalkan status DIKECUALIKAN untuk ${namaGuru} (Minggu ${minggu}) dan kembalikan kepada Belum Hantar?`)) return;
-
-      try {
-        const res = await fetch(WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "batalKecuali",
-            noIC: adminIC,
-            minggu: minggu,
-            namaGuru: namaGuru
-          })
-        });
-        const result = await res.json();
-        if (result.status === "success") {
-          await loadData();
-        } else {
-          alert(result.message);
-          adminIC = null;
-          location.reload();
-        }
-      } catch (err) {
-        alert("Ralat sambungan: " + err);
-      }
-    }
-
-    function bacaFailBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve({
-          fileName: file.name,
-          mimeType: file.type,
-          fileData: reader.result.split(",")[1]
-        });
-        reader.onerror = error => reject(error);
-        reader.readAsDataURL(file);
-      });
-    }
-
-    document.getElementById("uploadForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const namaGuru = document.getElementById("selectGuru").value;
-      const minggu = document.getElementById("selectMinggu").value;
-      const pinIC = document.getElementById("pinIC").value.trim();
-      const filesInput = document.getElementById("fileRPH").files;
-
-      if (filesInput.length === 0) return;
-
-      const sudahHantar = dataRekod.some(r => r[1] == minggu && r[2] === namaGuru && r[4] !== "Dikecualikan");
-      if (sudahHantar) {
-        const sahGanti = confirm(`Rekod RPH anda untuk Minggu ${minggu} sudah wujud.\n\nAdakah anda pasti mahu MENGGANTIKAN (overwrite) fail lama dengan fail baharu ini?`);
-        if (!sahGanti) return;
-      }
-
-      const btn = document.getElementById("btnHantar");
-      const statusText = document.getElementById("statusUpload");
-
-      btn.disabled = true;
-      btn.innerText = `Mengesahkan & Memuat Naik...`;
-      statusText.classList.remove("hidden");
-      statusText.className = "mt-3 text-sm font-medium text-blue-700";
-      statusText.innerText = `Sila tunggu, sedang mengesahkan identiti & menghantar fail...`;
-
-      try {
-        const senaraiFail = await Promise.all(Array.from(filesInput).map(f => bacaFailBase64(f)));
-
-        const payload = {
-          action: "upload",
-          namaGuru: namaGuru,
-          pinIC: pinIC,
-          minggu: minggu,
-          files: senaraiFail
-        };
-
-        const res = await fetch(WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-
-        if (result.status === "success") {
-          statusText.className = "mt-3 text-sm font-medium text-emerald-700";
-          statusText.innerText = `Berjaya! ${filesInput.length} fail RPH telah direkodkan.`;
-          document.getElementById("uploadForm").reset();
-          aktifkanMingguSemasaDanCountdown();
-          await loadData();
-        } else {
-          statusText.className = "mt-3 text-sm font-medium text-rose-700";
-          statusText.innerText = result.message;
-        }
-      } catch (err) {
-        statusText.className = "mt-3 text-sm font-medium text-rose-700";
-        statusText.innerText = "Ralat semasa muat naik: " + err;
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "Hantar RPH";
-      }
-    });
-
-    function bukaModalAdmin() {
-      document.getElementById("modalAdmin").classList.remove("hidden");
-      document.getElementById("modalAdmin").classList.add("flex");
-    }
-    function tutupModalAdmin() {
-      document.getElementById("modalAdmin").classList.add("hidden");
-      document.getElementById("modalAdmin").classList.remove("flex");
-    }
-    function sahkanAdmin() {
-      const ic = document.getElementById("inputIC").value.trim();
-      if (!ic) return;
-      adminIC = ic;
-      tutupModalAdmin();
-      document.getElementById("adminPanel").innerHTML = `<span class="bg-emerald-500 text-slate-900 text-xs font-bold px-3 py-1.5 rounded-lg">Mod Pentadbir Aktif</span>`;
-      document.querySelectorAll(".admin-col").forEach(el => el.classList.remove("hidden"));
-      renderDashboard();
-    }
-
-    async function pulangkanBahan(minggu, namaGuru) {
-      const catatan = prompt(`Pulangkan RPH ${namaGuru} (Minggu ${minggu}).\n\nSila nyatakan sebab / kesalahan bahan untuk pembetulan guru:`);
-      if (catatan === null) return;
-      if (catatan.trim() === "") {
-        alert("Sila masukkan catatan kesalahan sebelum memulangkan bahan.");
-        return;
-      }
-
-      try {
-        const res = await fetch(WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "pulangkan",
-            noIC: adminIC,
-            minggu: minggu,
-            namaGuru: namaGuru,
-            catatan: catatan.trim()
-          })
-        });
-        const result = await res.json();
-        if (result.status === "success") {
-          alert("Bahan telah dipulangkan untuk pembetulan oleh: " + result.admin);
-          await loadData();
-        } else {
-          alert(result.message);
-          adminIC = null;
-          location.reload();
-        }
-      } catch (err) {
-        alert("Ralat sambungan: " + err);
-      }
-    }
-
-    loadData();
   </script>
 </body>
 </html>
